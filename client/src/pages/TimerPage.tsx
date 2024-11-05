@@ -1,77 +1,60 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/TimerPageStyles.css';
 import Button from 'react-bootstrap/Button';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function TimerPage(): JSX.Element {
+const [time, setTime] = useState(0);
+const [isRunning, setIsRunning] = useState(false);
 
-  const [days, setDays] = React.useState(0);
-  const [hours, setHours] = React.useState(0);
-  const [minutes, setMinutes] = React.useState(0);
-  const [seconds, setSeconds] = React.useState(0);
+  useEffect(() => {
+    let interval: string | number | NodeJS.Timeout | undefined;
+ if (isRunning) {
+      interval = setInterval(() => {
+        setTime(prevTime => prevTime + 1);
+      }, 1000); // Update every 1 second
+    }
 
-  const deadline = "December, 31, 2022";
+    return () => clearInterval(interval); 
+  }, [isRunning]);
 
-  const getTime = () => {
-    const time = Date.parse(deadline) - Date.now();    
-
-    setDays(Math.floor(time / (1000 * 60 * 60 * 24)));
-    setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
-    setMinutes(Math.floor((time / 1000 / 60) % 60));
-    setSeconds(Math.floor((time / 1000) % 60));
+  const handleTimer = () => {
+    if (isRunning){
+      setIsRunning(false);
+      setTime(0);
+    } else {
+      setIsRunning(true);
+    }
   };
 
-  React.useEffect(() => {
-    const interval = setInterval(() => getTime(), 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return ( 
-    <div >
-  <div 
-  style={{ display: 'flex', justifyContent: 'right', alignItems: 'right', padding: "5px"}}>
-    <Button  variant="primary" size="lg">
-        Home
-    </Button>
-    </div>
-
-    <div className="timer" role="timer">
-      <div className="col-4">
-        <div className="box">
-          <p id="day">{days < 10 ? "0" + days : days}</p>
-          <span className="text">Days</span>
-        </div>
-      </div>
-      <div className="col-4">
-        <div className="box">
-          <p id="hour">{hours < 10 ? "0" + hours : hours}</p>
-          <span className="text">Hours</span>
-        </div>
-      </div>
-      <div className="col-4">
-        <div className="box">
-          <p id="minute">{minutes < 10 ? "0" + minutes : minutes}</p>
-          <span className="text">Minutes</span>
-        </div>
-      </div>
-      <div className="col-4">
-        <div className="box">
-          <p id="second">{seconds < 10 ? "0" + seconds : seconds}</p>
-          <span className="text">Seconds</span>
-        </div>
-      </div>
-    </div>
-
-     <div 
-  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: "5px"}}>
-    <Button  variant="primary" size="lg">
-        Stop Timer
-    </Button>
-    </div>
-    </div>
+  const formatTime = (timeInSeconds: number) => {
+    const hours = (Math.floor((time / (1000 * 60 * 60)) % 24));
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
     
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'right', alignItems: 'right', padding: "20px"}}>
+        <Button className='homeButton' variant="primary">
+          <i className="bi bi-house"></i>
+        </Button>
+      </div>
+
+      <div className='timer'>{formatTime(time)}s</div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        <Button className='stopButton' variant="primary"
+        onClick={handleTimer}>
+        {isRunning ? "Stop Timer" : "Start Timer"}
+        </Button>
+      </div>
+    </div>
   );
+   
 }
 
 
