@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Navbar,
-  Nav,
   Button,
-  Container,
   Badge,
   Form,
   Modal,
@@ -13,7 +10,7 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Types remain the same
+// Types
 type Routine = {
   text: string;
   completed: boolean;
@@ -76,53 +73,44 @@ const CalendarPage: React.FC = (): JSX.Element => {
 
   return (
     <div style={{ height: '100vh', backgroundColor: '#2d1b69', display: 'flex', flexDirection: 'column' }}>
-      {/* Navbar */}
-      <Navbar bg="dark" variant="dark" expand="lg" style={{ flex: '0 0 auto' }}>
-        <Container fluid>
-          <Navbar.Brand href="#home">
-            <i className="bi bi-person-badge me-2"></i>
-            Profile
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link href="#settings">
-                <i className="bi bi-gear me-1"></i>
-                Settings
-              </Nav.Link>
-              <Nav.Link href="#link1">Link</Nav.Link>
-              <Nav.Link href="#link2">Link</Nav.Link>
-              <Nav.Link href="#link3">Link</Nav.Link>
-              <Nav.Link href="#link4">Link</Nav.Link>
-            </Nav>
-            <div className="d-flex align-items-center gap-4">
-              <Link to="/timer" className="text-white text-decoration-none">
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-clock fs-5"></i>
-                  <span>Sleep Timer</span>
-                </div>
-              </Link>
+      {/* Simplified Header */}
+      <div style={{ backgroundColor: '#1a103f', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white' }}>
+          <i className="bi bi-moon-stars" style={{ fontSize: '2rem' }}></i>
+          <span style={{ fontSize: '2rem', fontWeight: '600' }}>Nightly</span>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <Link to="/timer" className="text-decoration-none">
+            <Button variant="outline-light" className="d-flex align-items-center gap-2">
+              <i className="bi bi-clock fs-5"></i>
+              <span>Sleep Timer</span>
+            </Button>
+          </Link>
 
-              <div className="text-white text-center border-start border-end px-3">
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-fire"></i>
-                  <span>Current Streak</span>
-                </div>
-                <Badge bg="success" className="fs-6">100</Badge>
-              </div>
-              
-              <div className="d-flex align-items-center gap-3">
-                <Link to="/profile" className="text-white">
-                  <i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>
-                </Link>
-                <Button variant="outline-light" className="ms-2">
-                  <i className="bi bi-moon-stars"></i>
-                </Button>
-              </div>
+          <div className="text-white text-center border-start border-end px-3">
+            <div className="d-flex align-items-center gap-2">
+              <i className="bi bi-fire"></i>
+              <span>Current Streak</span>
             </div>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+            <Badge bg="success" className="fs-6">100</Badge>
+          </div>
+          
+          <div className="d-flex align-items-center gap-3">
+            <Link to="/profile" className="text-white">
+              <i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>
+            </Link>
+            <Button variant="outline-light" className="ms-2">
+              <i className="bi bi-moon-stars"></i>
+            </Button>
+          </div>
+
+          <Button variant="outline-light" className="d-flex align-items-center gap-2">
+            <i className="bi bi-gear fs-5"></i>
+            Settings
+          </Button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div style={{ flex: '1 1 auto', padding: '1.5rem', minHeight: '0' }}>
