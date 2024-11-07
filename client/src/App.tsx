@@ -4,6 +4,7 @@ import './App.css';
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import CalendarPage from "./pages/CalendarPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   return (
@@ -11,6 +12,7 @@ const App = () => {
       <Routes>
         <Route path="/login/" element={<LoginPage />} />
         <Route path="/calendar/" element={<CalendarPage />} />
+        <Route path="/profile/" element={<ProfilePage />} />
       </Routes>
     </div>
   );
