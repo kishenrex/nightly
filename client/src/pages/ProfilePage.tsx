@@ -1,9 +1,11 @@
+// Previous imports remain the same...
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
+// Previous type definitions remain the same...
 type ProfileField = {
   label: string;
   value: string;
@@ -12,6 +14,7 @@ type ProfileField = {
 };
 
 const ProfilePage: React.FC = () => {
+  // Previous state and handlers remain the same...
   const [profileFields, setProfileFields] = useState<ProfileField[]>([
     { label: 'Display Name', value: 'johnsmith123' },
     { label: 'Username', value: 'JohnMachine222' },
@@ -25,6 +28,7 @@ const ProfilePage: React.FC = () => {
   const [editValue, setEditValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Previous handlers remain the same...
   const handleEdit = (index: number) => {
     setEditingIndex(index);
     setEditValue(profileFields[index].value);
@@ -47,6 +51,7 @@ const ProfilePage: React.FC = () => {
     return field.value;
   };
 
+  // Previous renderField function remains the same...
   const renderField = (field: ProfileField, index: number) => {
     return (
       <div
@@ -110,14 +115,13 @@ const ProfilePage: React.FC = () => {
       backgroundColor: '#553C9A', 
       padding: '2rem'
     }}>
-      {/* White Background Container */}
+      {/* Previous header and main content structure remains the same... */}
       <div style={{
         backgroundColor: 'white',
         borderRadius: '20px',
         padding: '2rem',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
-        {/* Header with Home Button */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -150,18 +154,15 @@ const ProfilePage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Main Content */}
         <div style={{ 
           display: 'flex', 
           gap: '2rem',
           alignItems: 'flex-start'
         }}>
-          {/* Profile Fields */}
           <div style={{ flex: '1' }}>
             {profileFields.map((field, index) => renderField(field, index))}
           </div>
 
-          {/* Avatar Section */}
           <div style={{ 
             width: '300px',
             display: 'flex',
@@ -209,31 +210,33 @@ const ProfilePage: React.FC = () => {
                   }}></i>
                 </div>
               </div>
-              <Button
-                variant="link"
-                style={{
-                  position: 'absolute',
-                  bottom: '10px',
-                  right: '10px',
-                  backgroundColor: 'white',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}
-              >
-                <i className="bi bi-pencil"></i>
-              </Button>
+              <Link to="/avatars">
+                <Button
+                  variant="link"
+                  style={{
+                    position: 'absolute',
+                    bottom: '10px',
+                    right: '10px',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <i className="bi bi-pencil"></i>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Modal remains the same... */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>

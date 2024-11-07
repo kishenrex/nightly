@@ -105,10 +105,12 @@ const CalendarPage: React.FC = (): JSX.Element => {
             </Button>
           </div>
 
-          <Button variant="outline-light" className="d-flex align-items-center gap-2">
-            <i className="bi bi-gear fs-5"></i>
-            Settings
-          </Button>
+          <Link to="/settings" className="text-decoration-none">
+            <Button variant="outline-light" className="d-flex align-items-center gap-2">
+              <i className="bi bi-gear fs-5"></i>
+              Settings
+            </Button>
+          </Link>
         </div>
       </div>
 
