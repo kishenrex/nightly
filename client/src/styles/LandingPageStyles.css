@@ -2,6 +2,7 @@
     background-Image: url("../styles/LightThemeLandingPage.jpg");
     background-Size: cover;
     background-Repeat: no-repeat;
+    background-position: center;
     min-Height: 100vh;
 }
 .title {
