@@ -1,13 +1,10 @@
 name: Development
 
 on:
+  push:
+   branches: [ main ] 
   pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
-      - reopened
-  workflow_call:
+   branches: [ main ] # the Github Action will activate "on" the event that you "push" to the repo
 
 jobs:
   test:
@@ -16,7 +13,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "checkout repo"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: "setup node"
         uses: actions/setup-node@v2.1.5
@@ -26,10 +23,10 @@ jobs:
       - name: "install npm@latest"
         run: npm i -g npm@latest
 
-      - name: "📦 install dependencies"
+      - name: "install dependencies"
         uses: bahmutov/npm-install@v1
 
-      - name: "🔍 run tests"
+      - name: "run tests"
         run: npm run test --if-present
 
   lint:
@@ -38,7 +35,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "checkout repo"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: "setup node"
         uses: actions/setup-node@v2.1.5
