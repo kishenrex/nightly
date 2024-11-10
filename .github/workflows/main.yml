@@ -10,6 +10,12 @@ jobs:
   test:
     name: Test application
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: client/
+        
     timeout-minutes: 5
     steps:
       - name: "checkout repo"
@@ -32,6 +38,12 @@ jobs:
   lint:
     name: Code standards
     runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        shell: bash
+        working-directory: client/
+        
     timeout-minutes: 5
     steps:
       - name: "checkout repo"
