@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '../styles/TimerPageStyles.css';
 import Button from 'react-bootstrap/Button';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import HomeButton from '../components/HomeButton';
 
 function TimerPage(): JSX.Element {
 const [time, setTime] = useState(0);
@@ -39,15 +40,13 @@ const [isRunning, setIsRunning] = useState(false);
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'right', alignItems: 'right', padding: "20px"}}>
-        <Button className='homeButton' variant="primary">
-          <i className="bi bi-house"></i>
-        </Button>
+        <HomeButton></HomeButton>
       </div>
 
-      <div className='timer'>{formatTime(time)}s</div>
+      <div className='timer' data-testid="timer" >{formatTime(time)}s</div>
 
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-        <Button className='stopButton' variant="primary"
+        <Button className='stopButton' aria-label="start/stopButton" variant="primary"
         onClick={handleTimer}>
         {isRunning ? "Stop Timer" : "Start Timer"}
         </Button>
