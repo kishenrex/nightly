@@ -1,14 +1,21 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import CheckList from './pages/Checklist';
+import { Route, Routes } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import CalendarPage from "./pages/CalendarPage";
+import ProfilePage from "./pages/ProfilePage";
 
-function App() {
+const App = () => {
   return (
-    <div className="App" style={{backgroundColor: 'bisque', minHeight: '100vh', minWidth: '100vh'}}>
-      <CheckList/>
+    <div>
+      <Routes>
+        <Route path="/login/" element={<LoginPage />} />
+        <Route path="/calendar/" element={<CalendarPage />} />
+        <Route path="/profile/" element={<ProfilePage />} />
+      </Routes>
     </div>
   );
-}
+};
 
 export default App;
