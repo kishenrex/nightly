@@ -9,7 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: ./client # Default working directory for the job
     steps:
     - uses: actions/checkout@v4
 
@@ -19,11 +21,8 @@ jobs:
       with:
         node-version: '22'
         cache: 'npm'
-        working-directory: ../client # Specify client directory
     - run: npm ci
-      working-directory: ../client 
     - run: npm run build --if-present
-      working-directory: ../client 
 
     # --- Server Build ---
     - name: Use Node.js for Server
@@ -31,8 +30,7 @@ jobs:
       with:
         node-version: '22'
         cache: 'npm'
-        working-directory: ../server # Specify server directory
-    - run: npm ci
-      working-directory: ../server 
-    - run: npm test 
-      working-directory: ../server 
+    - run: |  # Use a multi-line command to change directory
+        cd ../server
+        npm ci
+        npm test
