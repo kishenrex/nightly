@@ -5,7 +5,6 @@ body {
 
 }
 
-
 .timer {
     color: #FFEDED;
     display: flex;
@@ -33,4 +32,3 @@ body {
     border-Radius: 10px;
     width: 250px;
 }
-
