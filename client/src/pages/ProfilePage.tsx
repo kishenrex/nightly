@@ -1,11 +1,9 @@
-// Previous imports remain the same...
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Previous type definitions remain the same...
 type ProfileField = {
   label: string;
   value: string;
@@ -14,13 +12,10 @@ type ProfileField = {
 };
 
 const ProfilePage: React.FC = () => {
-  // Previous state and handlers remain the same...
   const [profileFields, setProfileFields] = useState<ProfileField[]>([
-    { label: 'Display Name', value: 'johnsmith123' },
     { label: 'Username', value: 'JohnMachine222' },
     { label: 'Password', value: 'mySecurePassword123', type: 'password', masked: true },
-    { label: 'Email', value: 'johnnyappleseed@nightly.com' },
-    { label: 'Phone Number', value: '1112223333' }
+    { label: 'Email', value: 'johnnyappleseed@nightly.com' }
   ]);
 
   const [showModal, setShowModal] = useState(false);
@@ -28,7 +23,6 @@ const ProfilePage: React.FC = () => {
   const [editValue, setEditValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Previous handlers remain the same...
   const handleEdit = (index: number) => {
     setEditingIndex(index);
     setEditValue(profileFields[index].value);
@@ -51,7 +45,6 @@ const ProfilePage: React.FC = () => {
     return field.value;
   };
 
-  // Previous renderField function remains the same...
   const renderField = (field: ProfileField, index: number) => {
     return (
       <div
@@ -115,7 +108,6 @@ const ProfilePage: React.FC = () => {
       backgroundColor: '#553C9A', 
       padding: '2rem'
     }}>
-      {/* Previous header and main content structure remains the same... */}
       <div style={{
         backgroundColor: 'white',
         borderRadius: '20px',
@@ -236,7 +228,6 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal remains the same... */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
