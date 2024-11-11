@@ -14,11 +14,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1",
-<<<<<<< HEAD
     "sqlite3": "^5.1.7"
-=======
-    "server": "file:"
->>>>>>> 18979bcb1aefc643b6b06257bbe7dfbad784e686
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
