@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { Button, Container, Row, Col, Image } from 'react-bootstrap'; // Import components
 
 interface User {
   access_token: string;
@@ -50,25 +51,33 @@ function LoginPage(): JSX.Element {
   };
 
   return (
-    <div>
-      <h2>React Google Login</h2>
-      <br />
-      <br />
-      {profile ? (
-        <div>
-          <img src={profile.picture} alt="user image" />
-          <h3>User Logged in</h3>
-          <p>Name: {profile.name}</p>
-          <p>Email Address: {profile.email}</p>
-          <br />
-          <br />
-          <button onClick={logOut}>Log out</button>
-        </div>
-      ) : (
-        <button onClick={() => login()}>Sign in with Google</button>
-      )}
-    </div>
-  );
+  <Container>
+    <Row className="justify-content-md-center"> 
+      <Col xs={12} sm={12} md={6}>
+        <h2>Welcome to Nightly</h2>
+        <br />
+        <br />
+        {profile ? (
+          <div>
+            <Image src={profile.picture} alt="user image" roundedCircle /> 
+            <h3>User Logged in</h3>
+            <p>Name: {profile.name}</p>
+            <p>Email Address: {profile.email}</p>
+            <br />
+            <br />
+            <Button variant="danger" onClick={logOut}> 
+              Log out
+            </Button>
+          </div>
+        ) : (
+          <Button variant="primary" onClick={() => login()}> 
+            Sign in with Google
+          </Button>
+        )}
+      </Col>
+    </Row>
+  </Container>
+);
 }
 
 export default LoginPage;
