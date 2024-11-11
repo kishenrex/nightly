@@ -5,6 +5,7 @@ import CalendarPage from "./pages/CalendarPage";
 import ProfilePage from "./pages/ProfilePage";
 import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
+import TimerPage from './pages/TimerPage';
 
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/calendar/" element={<CalendarPage />} />
         <Route path="/profile/" element={<ProfilePage />} />
         <Route path="/checklist/" element={<ChecklistPage />} />
+        <Route path="/timer/" element={<TimerPage />} />
       </Routes>
     </div>
   );
