@@ -13,7 +13,8 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "server": "file:"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
