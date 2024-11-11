@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ../client # Default working directory for the job
+        working-directory: ./client # Default working directory for the job
     steps:
     - uses: actions/checkout@v4
 
