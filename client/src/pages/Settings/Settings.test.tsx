@@ -6,7 +6,7 @@ import Settings from './Settings';
 describe('Settings Is There', () => {
     test('shows the Settings page with all options', () => {
         render(<Settings />);
-        
+
         expect(screen.getByText('Settings')).toBeInTheDocument();
         const desktopToggle = screen.getByLabelText(/Desktop Notification Preferences/i);
         expect(desktopToggle).toBeInTheDocument();
