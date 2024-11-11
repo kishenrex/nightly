@@ -11,7 +11,17 @@ function HomeButton(): JSX.Element {
 
 return (
     <div>
-        <Button className='homeButton' role="button" aria-label="home" onClick={routeChange} variant="primary">
+        <Button style={{
+        color: 'white',
+        backgroundColor: '#282c34',
+        fontSize: '30px',
+        borderWidth: '3px',
+        borderRadius: '10px',
+        borderColor: 'white',
+        width: '60px',
+        height: '60px',
+        cursor: 'pointer',
+        }}className='homeButton' role="button" aria-label="home" onClick={routeChange} variant="primary">
           <i className="bi bi-house"></i>
         </Button>
     </div>
