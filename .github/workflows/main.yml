@@ -15,11 +15,12 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ${{ matrix.dir }} # Default working directory for the job
     steps:
     - uses: actions/checkout@v4
     
     - run: pwd
+      working-directory: ${{ matrix.dir }}
+
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
