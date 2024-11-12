@@ -5,6 +5,8 @@ import CalendarPage from "./pages/CalendarPage";
 import ProfilePage from "./pages/ProfilePage";
 import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
+import TimerPage from './pages/TimerPage';
+import AvatarPage from './pages/AvatarPage';
 import Setting from "./pages/Settings/Settings";
 
 
@@ -18,6 +20,8 @@ const App = () => {
         <Route path="/calendar/" element={<CalendarPage />} />
         <Route path="/profile/" element={<ProfilePage />} />
         <Route path="/checklist/" element={<ChecklistPage />} />
+        <Route path="/timer/" element={<TimerPage />} />
+        <Route path="/avatar" element={<AvatarPage />} />
         <Route path="/settings/" element={<Setting />} />
       </Routes>
     </div>
