@@ -12,12 +12,11 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./client # Default working directory for the job
+        working-directory: client # Default working directory for the job
     steps:
     - uses: actions/checkout@v4
 
     # --- Client Build ---
-    - run: cd ../nightly/nightly/client
     - name: Use Node.js for Client
       uses: actions/setup-node@v3
       with:
