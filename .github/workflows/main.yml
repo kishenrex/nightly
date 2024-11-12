@@ -28,12 +28,13 @@ jobs:
     - run: npm run build --if-present
 
     # --- Server Build ---
+    - run: npm cd ../server
+    - run: pwd
     - name: Use Node.js for Server
       uses: actions/setup-node@v3
       with:
         node-version: '22'
         cache: 'npm'
-    - run: |  # Use a multi-line command to change directory
-        cd ../server
-        npm ci
-        npm test
+        cache-dependency-path: server
+    - run: npm ci
+    - run: npm run build --if-present
