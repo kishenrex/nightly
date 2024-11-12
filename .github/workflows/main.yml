@@ -23,6 +23,7 @@ jobs:
       with:
         node-version: '22'
         cache: 'npm'
+        path: ~/client
     - run: npm ci
     - run: npm run build --if-present
 
