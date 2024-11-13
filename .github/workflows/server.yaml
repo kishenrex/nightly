@@ -18,7 +18,7 @@ jobs:
 
     # --- server Build ---
     - run: pwd
-    - name: Use Node.js for Client
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '22'
