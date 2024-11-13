@@ -11,7 +11,9 @@ function LoginButton(): JSX.Element {
 
 return (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',}}>
-    <Button className='loginButton' role="button" onClick={routeChange} variant="primary">
+    <Button style={{
+       borderWidth: '0px',
+    }} className='loginButton' role="button" onClick={routeChange} variant="primary">
       Login
     </Button>
   </div>
