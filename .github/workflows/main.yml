@@ -8,23 +8,21 @@ on:
 
 jobs:
   build:
-    name: setting up for client and server
     runs-on: ubuntu-latest
-    strategy:
-      matrix: { dir: ['client', 'server'] }
     defaults:
       run:
         shell: bash
+        working-directory: client # Default working directory for the job
     steps:
     - uses: actions/checkout@v4
-    
-    - run: pwd
-      working-directory: ${{ matrix.dir }}
 
-    - name: Use Node.js
+    # --- Client Build ---
+    - run: pwd
+    - name: Use Node.js for Client
       uses: actions/setup-node@v3
       with:
         node-version: '22'
-        cache-dependency-path: ${{ matrix.dir }}
+        cache: 'npm'
+        cache-dependency-path: client
     - run: npm ci
     - run: npm run build --if-present
