@@ -7,6 +7,7 @@ import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
 import TimerPage from './pages/TimerPage';
 import AvatarPage from './pages/AvatarPage';
+import Settings from './pages/Settings/Settings';
 
 const App = () => {
   return (
@@ -20,6 +21,8 @@ const App = () => {
         <Route path="/checklist/" element={<ChecklistPage />} />
         <Route path="/timer/" element={<TimerPage />} />
         <Route path="/avatar" element={<AvatarPage />} />
+        <Route path="/settings" element={<Settings />} />
+
       </Routes>
     </div>
   );
