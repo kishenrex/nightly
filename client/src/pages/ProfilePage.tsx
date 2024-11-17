@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import HomeButton from '../components/HomeButton';
 import { UserAvatar } from '../components/UserAvatar';
-import { AvatarContext } from '../context/AvatarContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 type ProfileField = {
   label: string;
@@ -15,6 +15,7 @@ type ProfileField = {
 };
 
 const ProfilePage: React.FC = () => {
+  const {theme} = useContext(ThemeContext);
   const [profileFields, setProfileFields] = useState<ProfileField[]>([
     { label: 'Username', value: 'JohnMachine222' },
     { label: 'Password', value: 'mySecurePassword123', type: 'password', masked: true },
@@ -109,11 +110,11 @@ const ProfilePage: React.FC = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      backgroundColor: '#553C9A', 
+      backgroundColor: theme.background, 
       padding: '2rem'
     }}>
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: theme.foreground,
         borderRadius: '20px',
         padding: '2rem',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
@@ -125,14 +126,14 @@ const ProfilePage: React.FC = () => {
           alignItems: 'center'
         }}>
           <h1 style={{ 
-            color: 'black', 
+            color: theme.fontColor, 
             fontSize: '2rem', 
             margin: 0 
           }}>
             Profile
           </h1>
           <Link to="/calendar">
-            <Button 
+            {/*<Button 
               variant="dark" 
               style={{ 
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -144,10 +145,10 @@ const ProfilePage: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-            >
+            >*/}
               <HomeButton></HomeButton>
              {/*<i className="bi bi-house-fill" style={{ fontSize: '1.5rem' }}></i> */} 
-            </Button>
+            {/*</Button>*/}
           </Link>
         </div>
 
@@ -167,7 +168,7 @@ const ProfilePage: React.FC = () => {
             alignItems: 'center'
           }}>
             <h2 style={{ 
-              color: 'black',
+              color: theme.fontColor,
               marginBottom: '1rem',
               fontSize: '1.5rem'
             }}>

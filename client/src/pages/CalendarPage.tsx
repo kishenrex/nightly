@@ -5,12 +5,13 @@ import {
   Badge,
   Form,
   Modal,
-  FormControl
+  FormControl,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { UserAvatar } from '../components/UserAvatar';
-import { AvatarContext } from '../context/AvatarContext';
+import ToggleThemeButton from '../components/ToggleThemeButton';
+import { ThemeContext } from '../context/ThemeContext';
 
 // Types
 type Routine = {
@@ -73,18 +74,19 @@ const CalendarPage: React.FC = (): JSX.Element => {
     }));
   };
 
+  const {theme} = useContext(ThemeContext);
   return (
-    <div style={{ height: '100vh', backgroundColor: '#2d1b69', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', backgroundColor: theme.background, display: 'flex', flexDirection: 'column' }}>
       {/* Simplified Header */}
-      <div style={{ backgroundColor: '#1a103f', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white' }}>
-          <i className="bi bi-moon-stars" style={{ fontSize: '2rem' }}></i>
+      <div style={{ backgroundColor: theme.foreground, padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
+          <i className="bi bi-moon-stars" style={{ fontSize: '2rem', color: theme.fontColor }}></i>
           <span style={{ fontSize: '2rem', fontWeight: '600' }}>Nightly</span>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <Link to="/timer" className="text-decoration-none">
-            <Button variant="outline-light" className="d-flex align-items-center gap-2">
+            <Button  style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2">
               <i className="bi bi-clock fs-5"></i>
               <span>Sleep Timer</span>
             </Button>
@@ -92,8 +94,8 @@ const CalendarPage: React.FC = (): JSX.Element => {
 
           <div className="text-white text-center border-start border-end px-3">
             <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-fire"></i>
-              <span>Current Streak</span>
+              <i style={{color: theme.fontColor}}className="bi bi-fire"></i>
+              <span style={{color: theme.fontColor}}>Current Streak</span>
             </div>
             <Badge bg="success" className="fs-6">100</Badge>
           </div>
@@ -103,13 +105,14 @@ const CalendarPage: React.FC = (): JSX.Element => {
               <UserAvatar/>
               {/*<i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>*/}
             </Link>
-            <Button variant="outline-light" className="ms-2">
-              <i className="bi bi-moon-stars"></i>
-            </Button>
+            {/*<Button variant="outline-light" className="ms-2">*/}
+              <ToggleThemeButton></ToggleThemeButton>
+              {/*<i className="bi bi-moon-stars"></i>*/}
+            {/*</Button>*/}
           </div>
 
           <Link to="/settings" className="text-decoration-none">
-            <Button variant="outline-light" className="d-flex align-items-center gap-2">
+            <Button style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2">
               <i className="bi bi-gear fs-5"></i>
               Settings
             </Button>
@@ -121,8 +124,9 @@ const CalendarPage: React.FC = (): JSX.Element => {
       <div style={{ flex: '1 1 auto', padding: '1.5rem', minHeight: '0' }}>
         <div style={{ display: 'flex', gap: '1.5rem', height: '100%'}}>
           {/* Calendar Panel */}
-          <div style={{ flex: '1 1 auto', width: '80%', backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-            <h2 className="mb-4">
+          <div style={{ flex: '1 1 auto', width: '80%',
+           borderRadius: '0.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column'}}>
+            <h2 style={{color: theme.fontColor}}className="mb-4">
               <i className="bi bi-calendar3 me-2"></i>
               Calendar
             </h2>
@@ -135,13 +139,13 @@ const CalendarPage: React.FC = (): JSX.Element => {
           {/* Routine Panel */}
           <div style={{ 
             width: '500px', 
-            backgroundColor: '#1a103f', 
+            backgroundColor: theme.nightRoutineBackground, 
             borderRadius: '0.5rem', 
             padding: '1.5rem',
             display: 'flex',
             flexDirection: 'column'
           }}>
-            <h2 className="text-white mb-4">
+            <h2 style={{color: theme.fontColor}} className="text mb-4">
               <i className="bi bi-moon-stars me-2"></i>
               Night Routine for the Day
             </h2>
@@ -179,23 +183,25 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate }): JSX.
     calendarDays.push(...Array(7).fill(null));
   }
 
+  const {theme} = useContext(ThemeContext);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: '1', minHeight: '0' }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="m-0">
+        <h3 style={{color: theme.fontColor}}className="m-0">
           {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
         </h3>
         <div>
-          <Button variant="outline-primary" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
-            <i className="bi bi-chevron-left"></i>
+          <Button variant="outline-light" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+            <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
           </Button>
-          <Button variant="outline-primary" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
-            <i className="bi bi-chevron-right"></i>
+          <Button variant="outline-light" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+            <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
           </Button>
         </div>
       </div>
 
-      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', minHeight: '0' }}>
+      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', minHeight: '0', background: theme.calendarBackground}}>
         <table className="table table-bordered m-0" style={{ flex: '1', tableLayout: 'fixed' }}>
           <thead>
             <tr>
@@ -255,10 +261,10 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
       setShowModal(false);
     }
   };
-
+  const { theme } = useContext(ThemeContext);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      <div style={{ flex: '1', overflowY: 'auto', marginBottom: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, color: theme.fontColor }}>
+      <div style={{ flex: '1', overflowY: 'auto', marginBottom: '1rem', color: theme.fontColor }}>
         {selectedDate ? (
           <Form>
             {routines.map((routine, index) => (
@@ -270,7 +276,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                   checked={routine.completed}
                   onChange={() => onToggleRoutine(index)}
                   className="text-white flex-grow-1"
-                  style={{ fontSize: '1.1rem', paddingRight: '1rem' }}
+                  style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor }}
                 />
                 <Button 
                   variant="outline-danger" 
@@ -284,17 +290,18 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             ))}
           </Form>
         ) : (
-          <p className="text-white">Select a day to see routines</p>
+          <p style={{color: theme.fontColor}} className="text-white" >Select a day to see routines</p>
         )}
       </div>
 
       <Button 
+      style={{color: theme.fontColor}}
         variant="outline-light" 
         className="w-100" 
         onClick={() => setShowModal(true)}
         size="lg"
       >
-        <i className="bi bi-plus-lg me-2"></i>
+        <i  className="bi bi-plus-lg me-2"></i>
         Add New Routine
       </Button>
 

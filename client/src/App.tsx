@@ -8,10 +8,12 @@ import LandingPage from "./pages/LandingPage";
 import TimerPage from './pages/TimerPage';
 import AvatarPage from './pages/AvatarPage';
 import { AvatarProvider } from './context/AvatarContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const App = () => {
   return (
     <div>
+      <ThemeProvider>
       <AvatarProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -23,7 +25,8 @@ const App = () => {
         <Route path="/timer/" element={<TimerPage />} />
         <Route path="/avatars" element={<AvatarPage />} />
       </Routes>     
-      </AvatarProvider>
+      </AvatarProvider>   
+      </ThemeProvider>
     </div>
   );
  };

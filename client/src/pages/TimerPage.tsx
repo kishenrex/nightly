@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import '../styles/TimerPageStyles.css';
 import {Button, Modal} from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -6,6 +6,7 @@ import HomeButton from '../components/HomeButton';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
+import { ThemeContext } from '../context/ThemeContext';
 
 function TimerPage(): JSX.Element {
 const [time, setTime] = useState(0);
@@ -18,6 +19,7 @@ const [userTime, setUserTime] = useState(0);
 const [hours, setHours] = useState(0);
 const [minutes, setMinutes] = useState(0);
 const [seconds, setSeconds] = useState(0);
+const {theme} = useContext(ThemeContext);
 
 let navigate = useNavigate(); 
   const routeChange = () =>{ 
@@ -105,7 +107,7 @@ useEffect(() => {
   };
   
   return (
-    <div style= {{backgroundColor: '#434343',  minHeight: '100vh'}}>
+    <div style= {{backgroundColor: theme.background,  minHeight: '100vh'}}>
 
       <div style={{ 
         display: 'flex', 
@@ -116,7 +118,7 @@ useEffect(() => {
         <HomeButton></HomeButton>
       </div>
 
-      <div className='timer' data-testid="timer" >{formatTime(time)}s</div>
+      <div style={{color: theme.timerColor}}className='timer' data-testid="timer" >{formatTime(time)}s</div>
 
       <div style={{ 
         display: 'flex', 
@@ -124,15 +126,15 @@ useEffect(() => {
         alignItems: 'center',
       }}>
         <Button style= {{
-        color: '#303030',
+        color: theme.fontColor,
+        backgroundColor: theme.foreground,
         fontFamily: 'Montserrat',
-        backgroundColor: '#FFFFFF',
         fontSize: '35px',
         borderWidth: '2px',
         borderRadius: '10px',
         borderColor: 'white',
         width: '250px',
-        }} className='stopButton' aria-label="start/stopButton" variant="primary"
+        }} className='stopButton' aria-label="start/stopButton" variant="outline-light"
         onClick={() =>{handleTimer(); handleShow();}}>
         {isRunning ? "Stop Timer" : "Start Timer"}
         </Button>

@@ -1,6 +1,8 @@
 import Button from 'react-bootstrap/Button';
 import '../styles/TimerPageStyles.css';
 import { useNavigate } from "react-router-dom";
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
 function HomeButton(): JSX.Element {
   let navigate = useNavigate(); 
@@ -8,20 +10,19 @@ function HomeButton(): JSX.Element {
     let path = `/calendar`;
     navigate(path);
   }
-
+  const { theme } = useContext(ThemeContext);
 return (
     <div>
         <Button style={{
-        color: 'white',
-        backgroundColor: '#282c34',
+        color: theme.fontColor,
+        borderColor: theme.borderColor,
         fontSize: '30px',
-        borderWidth: '3px',
+        borderWidth: '2px',
         borderRadius: '10px',
-        borderColor: 'white',
         width: '60px',
         height: '60px',
         cursor: 'pointer',
-        }}className='homeButton' role="button" aria-label="home" onClick={routeChange} variant="primary">
+        }}role="button" aria-label="home" onClick={routeChange} variant="outline-light">
           <i className="bi bi-house"></i>
         </Button>
     </div>
