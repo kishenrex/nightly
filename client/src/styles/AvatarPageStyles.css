@@ -17,6 +17,8 @@ body {
 
 .userAvatar {
     font-Size: 100px;
+    border-color: black;
+    border-width: 10px;
 }
 
 .title{
@@ -32,4 +34,76 @@ body {
     display: inline-block;
     background-color: #FDF6EC;
     padding-left: 50px;
+}
+
+.avatar1_1{
+    background-Image: url("../styles/AvatarImages/Avatar1/pichu.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar1_2 {
+    background-Image: url("../styles/AvatarImages/Avatar1/pikachu.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar1_3 {
+    background-Image: url("../styles/AvatarImages/Avatar1/raichu.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar1_1:hover {
+    background-Image: url("../styles/AvatarImages/Avatar1/pichu.png");
+}
+.avatar2_1 {
+    background-Image: url("../styles/AvatarImages/Avatar2/squirtle.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar2_2 {
+    background-Image: url("../styles/AvatarImages/Avatar2/wartortle.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar2_3 {
+    background-Image: url("../styles/AvatarImages/Avatar2/blastoise.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+.avatar3_1 {
+    background-Image: url("../styles/AvatarImages/Avatar3/charmander.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar3_2 {
+    background-Image: url("../styles/AvatarImages/Avatar3/charmeleon.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar3_3 {
+    background-Image: url("../styles/AvatarImages/Avatar3/charizard.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.lock {
+    background-Image: url("../styles/AvatarImages/lock.png");
+    background-Size: cover;
+    width: 100%;
+    height: 100%;
 }

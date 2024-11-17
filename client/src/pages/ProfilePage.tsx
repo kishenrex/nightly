@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import HomeButton from '../components/HomeButton';
+import { UserAvatar } from '../components/UserAvatar';
+import { AvatarContext } from '../context/AvatarContext';
 
 type ProfileField = {
   label: string;
@@ -22,6 +25,7 @@ const ProfilePage: React.FC = () => {
   const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [editValue, setEditValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
@@ -141,7 +145,8 @@ const ProfilePage: React.FC = () => {
                 justifyContent: 'center'
               }}
             >
-              <i className="bi bi-house-fill" style={{ fontSize: '1.5rem' }}></i>
+              <HomeButton></HomeButton>
+             {/*<i className="bi bi-house-fill" style={{ fontSize: '1.5rem' }}></i> */} 
             </Button>
           </Link>
         </div>
@@ -196,10 +201,11 @@ const ProfilePage: React.FC = () => {
                   justifyContent: 'center',
                   alignItems: 'center'
                 }}>
-                  <i className="bi bi-person-fill" style={{ 
+                  <UserAvatar/>
+                  {/*<i className="bi bi-person-fill" style={{ 
                     fontSize: '60px',
                     color: '#A0A0A0'
-                  }}></i>
+                  }}></i>*/}
                 </div>
               </div>
               <Link to="/avatars">

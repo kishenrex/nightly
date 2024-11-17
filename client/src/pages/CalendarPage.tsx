@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Button,
@@ -9,6 +9,8 @@ import {
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { UserAvatar } from '../components/UserAvatar';
+import { AvatarContext } from '../context/AvatarContext';
 
 // Types
 type Routine = {
@@ -98,7 +100,8 @@ const CalendarPage: React.FC = (): JSX.Element => {
           
           <div className="d-flex align-items-center gap-3">
             <Link to="/profile" className="text-white">
-              <i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>
+              <UserAvatar/>
+              {/*<i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>*/}
             </Link>
             <Button variant="outline-light" className="ms-2">
               <i className="bi bi-moon-stars"></i>

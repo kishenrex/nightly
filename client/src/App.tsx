@@ -7,10 +7,12 @@ import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
 import TimerPage from './pages/TimerPage';
 import AvatarPage from './pages/AvatarPage';
+import { AvatarProvider } from './context/AvatarContext';
 
 const App = () => {
   return (
     <div>
+      <AvatarProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing" element={<LandingPage />} />
@@ -19,8 +21,9 @@ const App = () => {
         <Route path="/profile/" element={<ProfilePage />} />
         <Route path="/checklist/" element={<ChecklistPage />} />
         <Route path="/timer/" element={<TimerPage />} />
-        <Route path="/avatar" element={<AvatarPage />} />
-      </Routes>
+        <Route path="/avatars" element={<AvatarPage />} />
+      </Routes>     
+      </AvatarProvider>
     </div>
   );
  };
