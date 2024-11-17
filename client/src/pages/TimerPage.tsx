@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios'; 
 import '../styles/TimerPageStyles.css';
 import {Button, Modal} from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -25,6 +26,21 @@ let navigate = useNavigate();
     navigate(path);
   }
 
+   
+const saveSleepLog = async () => {
+  try {
+    const response = await axios.post('http://localhost:3001/sleep-logs', {
+      user_id: 1, 
+      sleep_duration: time, 
+      sleep_date: new Date().toISOString().split('T')[0], 
+      });
+  console.log('Sleep log saved:', response.data);
+  } catch (error) {
+   console.error('Error saving sleep log:', error);
+  }
+};
+
+
 const handleEdit = () => {
   setEdit(true);
   setShow(false);
@@ -36,6 +52,7 @@ const handleClose = () => {
 };
 const handleConfirm = () => {
   setShow(false);
+  saveSleepLog(); // Call timer API
 };
 const handleShow = () => {
   if (isRunning){

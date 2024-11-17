@@ -22,7 +22,6 @@ const App = () => {
         <Route path="/timer/" element={<TimerPage />} />
         <Route path="/avatar" element={<AvatarPage />} />
         <Route path="/settings" element={<Settings />} />
-
       </Routes>
     </div>
   );
