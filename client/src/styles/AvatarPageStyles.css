@@ -1,0 +1,35 @@
+html,
+body {
+    height: 100%;
+    background-color: #ECE5DB;
+
+}
+
+.backButton {
+    color: black;
+    background-color: #ECE5DB;
+    border-color: #ECE5DB;
+    font-Size: 20px;
+    font-Weight: bold;
+    width: 80px;
+    height: 60px;
+}
+
+.userAvatar {
+    font-Size: 100px;
+}
+
+.title{
+    font-Size: 50px;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+}
+
+.col_1,.col_2,.col_3 {
+    display: inline-block;
+    background-color: #FDF6EC;
+    padding-left: 50px;
+}
