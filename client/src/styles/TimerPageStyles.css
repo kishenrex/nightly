@@ -1,0 +1,34 @@
+html,
+body {
+    height: 100%;
+    background-color: #434343;
+
+}
+
+.timer {
+    color: #FFEDED;
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    font-size: 180px;
+    padding: 50px;
+}
+
+.homeButton {
+    color: white;
+    background-Color: #282c34;
+    font-Size: 30px;
+    border-Width: 3px;
+    border-Radius: 10000px;
+    width: 60px;
+    height: 60px;
+}
+.stopButton {
+    color: #303030;
+    font-Family: Montserrat;
+    background-Color: #FFFFFF;
+    font-Size: 35px;
+    border-Width: 2px;
+    border-Radius: 10px;
+    width: 250px;
+}

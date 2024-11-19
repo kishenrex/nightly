@@ -1,4 +1,4 @@
-name: Development
+name: Server dev
 
 on:
   push:
@@ -12,17 +12,20 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: client # Default working directory for the job
+        working-directory: server # Default working directory for the job
     steps:
     - uses: actions/checkout@v4
 
-    # --- Client Build ---
+    # --- server Build ---
     - run: pwd
-    - name: Use Node.js for Client
+    - run: rm -rf node_modules
+    - run: rm -f package-lock.json
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '22'
         cache: 'npm'
-        cache-dependency-path: client
+        cache-dependency-path: server
+    - run: npm i
     - run: npm ci
     - run: npm run build --if-present

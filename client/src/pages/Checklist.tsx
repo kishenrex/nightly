@@ -1,4 +1,4 @@
-import { useState, ChangeEventHandler } from "react";
+import { useState } from "react";
 import '../styles/checklist.css';
 import { Link } from 'react-router-dom';
 import { addDays } from 'date-fns';
