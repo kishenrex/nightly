@@ -46,14 +46,10 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ],
-    "jest": {
-      "transform": {
-        "\\.js$": "/node_modules/babel-jest"
-      }
-    }
+    ]
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.26.0",
     "babel-jest": "^29.7.0",
     "jest": "^27.5.1"
   }
