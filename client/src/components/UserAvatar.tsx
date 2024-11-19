@@ -12,7 +12,7 @@ let { avatar } = useContext(AvatarContext);
 return (
     <div style= {{ display: 'flex', borderWidth:'10px', borderColor: 'black'}} className='userAvatar'>  
     <Image style={{width:'100px', height: '100px'}}  className="border border-dark border-2"
-      src={require(`../styles/AvatarImages/${avatar}`)} roundedCircle />
+      src={require(`../styles/AvatarImages/${avatar}`)} role= 'img' aria-label= 'userAvatar' roundedCircle />
     </div>
   );
 }
