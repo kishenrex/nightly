@@ -7,6 +7,7 @@ import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
 import TimerPage from './pages/TimerPage';
 import AvatarPage from './pages/AvatarPage';
+import Settings from './pages/Settings/Settings';
 import { AvatarProvider } from './context/AvatarContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -24,6 +25,7 @@ const App = () => {
         <Route path="/checklist/" element={<ChecklistPage />} />
         <Route path="/timer/" element={<TimerPage />} />
         <Route path="/avatars" element={<AvatarPage />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>     
       </AvatarProvider>   
       </ThemeProvider>
