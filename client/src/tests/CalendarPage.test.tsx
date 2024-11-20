@@ -1,10 +1,9 @@
-// placeholder
-import { render } from "@testing-library/react";
-import App from "../App";
-import { MemoryRouter } from "react-router-dom";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import ChecklistPage from '../pages/Checklist';
 
-test('renders learn react link', () => {
-  render(<MemoryRouter>
-    <App />
-    </MemoryRouter>);
+test('Add night routine', () => {
+  render(<ChecklistPage />);
+  const addRoutineButton = screen.getByText("Add New Routine");
+  expect(addRoutineButton).toBeInTheDocument();
 });
