@@ -8,6 +8,7 @@ export const themes = {
    calendarBackground: '#cBDB7AF',
    nightRoutineBackground: '#97928C',
    fontColor: '#3F3A3A',
+   fontColor_sub: '#999999',
    landingPageBackgroundImage: 'LightThemeLandingPage.jpg',
    borderColor: '#000000',
    timerColor: '#3F3A3A',
@@ -19,6 +20,7 @@ export const themes = {
    calendarBackground: '#1a103f',
    nightRoutineBackground: '#351c75',
    fontColor: '#f3f6f4',
+   fontColor_sub: '#f3f6f4',
    landingPageBackgroundImage: 'DarkThemeLandingPage.jpg',
    borderColor: '#f3f6f4',
    timerColor: '#FFEDED',
@@ -36,6 +38,7 @@ interface ThemeContextType {
         fontColor: string;
         landingPageBackgroundImage: string;
         borderColor: string;
+        fontColor_sub: string;
      }>>,
 
 };
