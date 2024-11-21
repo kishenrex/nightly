@@ -653,6 +653,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         style={{width: "33%"}}
       >
         <i className="bi bi-plus-lg me-2"></i>
+        <br/>
         Routine
       </Button>
 
@@ -675,6 +676,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         style={{width: "33%"}}
       >
         <i className="bi bi-arrow-counterclockwise"></i>
+        <br/>
         Repeat
       </Button>
       </div>
