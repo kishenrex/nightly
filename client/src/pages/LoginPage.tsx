@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { Button, Container, Row, Col, Image } from 'react-bootstrap'; // Import components
+import { Button, Container, Row, Col, Image } from 'react-bootstrap'; 
 
 interface User {
   access_token: string;
