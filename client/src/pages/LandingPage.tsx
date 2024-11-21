@@ -1,10 +1,12 @@
 import '../styles/LandingPageStyles.css';
 import LoginButton from '../components/LoginButton';
-import { ThemeContext } from '../context/ThemeContext';
-import { useContext } from 'react';
+import React, { useState, useEffect } from 'react';
+import { googleLogout, useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
+
 
 function LandingPage(): JSX.Element {
-  const {theme} = useContext(ThemeContext);
+  
 return (
 <div style= {{
     background: `url("${require(`../styles/LandingPageImages/${theme.landingPageBackgroundImage}`)}")`, 
