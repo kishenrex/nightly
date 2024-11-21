@@ -13,7 +13,8 @@ function ToggleThemeButton(): JSX.Element {
   };
 return (
     <div>
-        <Button style={{color: theme.fontColor, borderColor: theme.borderColor}}
+        <Button style={{color: theme.fontColor, borderColor: theme.borderColor, 
+        height: theme.themeButtonSize, width: theme.themeButtonSize, fontSize: theme.themeButtonFontSize,}}
         className='toggleButton' role="button" aria-label="toggleTheme" onClick={toggleTheme} variant="outline-light">
           { !theme.boolean ? <i className="bi bi-sun"></i> : <i className="bi bi-moon-stars"></i>}
         </Button>

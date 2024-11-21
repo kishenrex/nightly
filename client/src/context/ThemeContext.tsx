@@ -12,6 +12,8 @@ export const themes = {
    landingPageBackgroundImage: 'LightThemeLandingPage.jpg',
    borderColor: '#000000',
    timerColor: '#3F3A3A',
+   themeButtonSize: '50px',
+   themeButtonFontSize: '20px',
  },
  dark: {
   boolean: false,
@@ -24,6 +26,8 @@ export const themes = {
    landingPageBackgroundImage: 'DarkThemeLandingPage.jpg',
    borderColor: '#f3f6f4',
    timerColor: '#FFEDED',
+   themeButtonSize: '50px',
+   themeButtonFontSize: '20px',
  },
 };
 
@@ -39,6 +43,8 @@ interface ThemeContextType {
         landingPageBackgroundImage: string;
         borderColor: string;
         fontColor_sub: string;
+        themeButtonSize: string;
+        themeButtonFontSize: string;
      }>>,
 
 };
