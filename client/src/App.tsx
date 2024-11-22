@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route } from 'react-router-dom';
+import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import CalendarPage from "./pages/CalendarPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -7,7 +7,7 @@ import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
 import TimerPage from './pages/TimerPage';
 import AvatarPage from './pages/AvatarPage';
-import Settings from './pages/Settings/Settings';
+import Settings from './pages/Settings';
 
 const App = () => {
   return (
@@ -22,6 +22,7 @@ const App = () => {
         <Route path="/timer/" element={<TimerPage />} />
         <Route path="/avatar" element={<AvatarPage />} />
         <Route path="/settings" element={<Settings />} />
+
       </Routes>
     </div>
   );

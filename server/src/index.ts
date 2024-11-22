@@ -1,53 +1,56 @@
 import express from 'express';
 import cors from 'cors';
-import db from './db';  
+import initDB from './initDB';
+import { createCalendarEndpoints } from './Calendar/calendar-endpoints';
+import { Database } from 'sqlite';
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors()); // Enables CORS for frontend-backend communication
-app.use(express.json()); // Parses incoming JSON requests
+app.use(cors());
+app.use(express.json());
 
-// Route to get sleep logs
-app.get('/sleep-logs', (req, res) => {
-  db.all('SELECT * FROM sleep_logs', [], (err, rows) => {
-      if (err) {
-          res.status(500).send({ error: 'Database error' });
-          return;
-      }
-      res.json(rows);
-  });
-});
+// Database and Server initialization
+async function startServer() {
+    try {
+        // Initialize database
+        const db: Database = await initDB();
+        console.log('Database initialized successfully');
 
-// Route to insert timer data into the database
-app.post('/sleep-logs', (req, res) => {
-  const { user_id, sleep_duration, sleep_date } = req.body; // Destructure incoming data
+        // Create endpoints
+        createCalendarEndpoints(app, db);
+        console.log('Endpoints created successfully');
 
-  if (!user_id || !sleep_duration || !sleep_date) {
-      res.status(400).send({ error: 'Missing required fields' });
-      return;
-  }
+        // Basic health check endpoint
+        app.get('/health', (req, res) => {
+            res.status(200).send({ status: 'OK' });
+        });
 
-  db.run(
-      `INSERT INTO sleep_logs (user_id, sleep_duration, sleep_date) VALUES (?, ?, ?)`,
-      [user_id, sleep_duration, sleep_date],
-      function (err) {
-          if (err) {
-              res.status(500).send({ error: 'Failed to insert sleep log' });
-          } else {
-              res.status(201).send({ id: this.lastID }); // Return the ID of the inserted row
-          }
-      }
-  );
-});
+        // Error handling middleware
+        app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.error(err.stack);
+            res.status(500).send({ error: 'Something went wrong!' });
+        });
 
-// Basic test route
-app.get('/', (req, res) => {
-    res.send('Hello from Express with TypeScript!');
-});
+        // Start the server
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
+
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
 
 // Start the server
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+startServer().catch(console.error);
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    process.exit(0);
 });
+
+export default app;
