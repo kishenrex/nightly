@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import '../styles/TimerPageStyles.css';
 import {Button, Modal} from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -7,10 +7,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 import { ThemeContext } from '../context/ThemeContext';
+import { TimerContext } from '../context/TimerContext';
+
 
 function TimerPage(): JSX.Element {
-const [time, setTime] = useState(0);
-const [isRunning, setIsRunning] = useState(false);
 const [show, setShow] = useState(false);
 const [edit, setEdit] = useState(false);
 const [errorMinute, setErrorMinute] = useState(false);
@@ -20,6 +20,7 @@ const [hours, setHours] = useState(0);
 const [minutes, setMinutes] = useState(0);
 const [seconds, setSeconds] = useState(0);
 const {theme} = useContext(ThemeContext);
+const {time, setTime, running, setRunning} = useContext(TimerContext);
 
 let navigate = useNavigate(); 
   const routeChange = () =>{ 
@@ -37,10 +38,11 @@ const handleClose = () => {
   setEdit(false);
 };
 const handleConfirm = () => {
+  setTime(0);
   setShow(false);
 };
 const handleShow = () => {
-  if (isRunning){
+  if (running){
     setShow(true);
   }
 };
@@ -68,42 +70,31 @@ const handleSeconds = (event: any) => {
     setSeconds(event.target.value);
   }
 };
-useEffect(() => {
-    let interval: string | number | NodeJS.Timeout | undefined;
- if (isRunning) {
-      interval = setInterval(() => {
-        setTime(prevTime => prevTime + 1);
-        setUserTime(prevTime => prevTime + 1);
-      }, 1000); // Update every 1 second
-    }
-
-    return () => clearInterval(interval); 
-  }, [isRunning]);
 
   const handleTimer = () => {
-    if (isRunning){
-      setIsRunning(false);
-      setHours((Math.floor((time / (1000 * 60 * 60)) % 24)));
-      setMinutes(Math.floor(time / 60));
-      setSeconds(time % 60);
-      setTime(0);
+    if (running){
+      setRunning(false);
+      setHours((Math.floor(((time/1000) / (1000 * 60 * 60)) % 24)));
+      setMinutes(Math.floor((time/1000) / 60));
+      setSeconds((time/1000) % 60);
     } else {
-      setIsRunning(true);
+      setRunning(true);
     }
   };
 
-  const formatTime = (timeInSeconds: number) => {
+  const formatTime = (timeInMiliSeconds: number) => {
+    const timeInSeconds = Math.floor(timeInMiliSeconds / 1000);
     const hours = (Math.floor((timeInSeconds / (1000 * 60 * 60)) % 24));
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = timeInSeconds % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const formatTimeUser = (timeInSeconds: number) => {
-    const hours = (Math.floor((timeInSeconds / (1000 * 60 * 60)) % 24));
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${hours.toString().padStart(2, '0')} hours, ${minutes.toString().padStart(2, '0')} minutes, ${seconds.toString().padStart(2, '0')} seconds`;
+  const formatTimeUser = () => {
+    const userHours = hours;
+    const userMinutes = minutes;
+    const userSeconds = seconds;
+    return `${userHours .toString().padStart(2, '0')} hours, ${userMinutes.toString().padStart(2, '0')} minutes, ${userSeconds.toString().padStart(2, '0')} seconds`;
   };
   
   return (
@@ -135,8 +126,8 @@ useEffect(() => {
         borderColor: 'white',
         width: '250px',
         }} className='stopButton' aria-label="start/stopButton" variant="outline-light"
-        onClick={() =>{handleTimer(); handleShow();}}>
-        {isRunning ? "Stop Timer" : "Start Timer"}
+      onClick={() => {handleTimer(); handleShow();}}>
+        {running ? "Stop Timer" : "Start Timer"}
         </Button>
       </div>
 
@@ -144,13 +135,16 @@ useEffect(() => {
         <Modal.Header closeButton>
           <Modal.Title>Time Slept</Modal.Title>
         </Modal.Header>
-           <Modal.Body>You slept for {formatTimeUser(userTime)}
+           <Modal.Body>You slept for {formatTimeUser()}
           </Modal.Body>
         <Modal.Footer>
-          <Button aria-label="editButton"variant="secondary" onClick={()=>{handleEdit();}}>
+          <Button aria-label="cancelButton"variant="secondary" onClick={()=>{handleClose();}}>
+            Cancel
+          </Button>
+          <Button aria-label="editButton"variant="primary" onClick={()=>{handleEdit();}}>
             Edit
           </Button>
-          <Button variant="primary" onClick={()=>{handleConfirm(); routeChange();}}>
+          <Button variant="success" onClick={()=>{handleConfirm(); routeChange();}}>
             Confirm
           </Button>
         </Modal.Footer>

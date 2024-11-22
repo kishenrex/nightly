@@ -4,9 +4,9 @@ export const themes = {
  light: {
   boolean: true,
    foreground: '#FDF6EC',
-   background: '#ECE5DB',
+   background: '#E5DACB',
    calendarBackground: '#cBDB7AF',
-   nightRoutineBackground: '#97928C',
+   navbar: '#ECE5DB',
    fontColor: '#3F3A3A',
    fontColor_sub: '#999999',
    landingPageBackgroundImage: 'LightThemeLandingPage.jpg',
@@ -20,7 +20,7 @@ export const themes = {
    foreground: '#2d1b69',
    background: '#1a103f',
    calendarBackground: '#1a103f',
-   nightRoutineBackground: '#351c75',
+   navbar: '#351c75',
    fontColor: '#f3f6f4',
    fontColor_sub: '#f3f6f4',
    landingPageBackgroundImage: 'DarkThemeLandingPage.jpg',
@@ -38,7 +38,7 @@ interface ThemeContextType {
         foreground: string; 
         background: string;
         calendarBackground: string;
-        nightRoutineBackground: string;
+        navbar: string;
         fontColor: string;
         landingPageBackgroundImage: string;
         borderColor: string;

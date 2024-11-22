@@ -10,11 +10,13 @@ import AvatarPage from './pages/AvatarPage';
 import Settings from './pages/Settings/Settings';
 import { AvatarProvider } from './context/AvatarContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { TimerProvider } from './context/TimerContext';
 
 const App = () => {
   return (
     <div>
       <ThemeProvider>
+      <TimerProvider>
       <AvatarProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -28,6 +30,7 @@ const App = () => {
         <Route path="/settings" element={<Settings />} />
       </Routes>     
       </AvatarProvider>   
+      </TimerProvider>
       </ThemeProvider>
     </div>
   );

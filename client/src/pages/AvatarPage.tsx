@@ -57,8 +57,8 @@ backgroundColor: theme.background }}>
 <div style={{ display: "flex", gridTemplateColumns: "repeat(3, 1fr)", gridGap: 50,
  justifyContent:'center', alignItems: 'center', padding:'10px'}}>
     <div style={{backgroundColor: theme.foreground, borderRadius: '60px',
-     width:'200px', height:'500px'}} className="p-3 border">
-       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+     width:'200px', height:'500px', }} className="p-3 border">
+       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{ backgroundImage: `url("${require(`../styles/AvatarImages/Avatar1/raichu.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
@@ -69,7 +69,7 @@ backgroundColor: theme.background }}>
         </Button>
       </div>
 
-       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar1/pikachu.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
@@ -79,7 +79,7 @@ backgroundColor: theme.background }}>
         </Button>
       </div>
 
-       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar1/pichu.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center"}} 
@@ -95,7 +95,7 @@ backgroundColor: theme.background }}>
     <div style={{backgroundColor: theme.foreground, borderRadius: '60px',
      width:'200px', height:'500px'}} className="p-3 border">
 
-      <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+      <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar2/blastoise.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
@@ -105,7 +105,7 @@ backgroundColor: theme.background }}>
         </Button>
       </div>
 
-      <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+      <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar2/wartortle.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
@@ -115,7 +115,7 @@ backgroundColor: theme.background }}>
         </Button>
       </div>
 
-       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar2/squirtle.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center"}} 
@@ -130,7 +130,7 @@ backgroundColor: theme.background }}>
     <div style={{backgroundColor: theme.foreground, borderRadius: '60px', 
     width:'200px', height:'500px'}} className="p-3 border">
 
-      <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+      <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar3/charizard.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
@@ -140,7 +140,7 @@ backgroundColor: theme.background }}>
         </Button>
       </div>
 
-       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar3/charmeleon.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
@@ -150,7 +150,7 @@ backgroundColor: theme.background }}>
         </Button>
       </div>
 
-       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center'}}>
+       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
         <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar3/charmander.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center"}} 
