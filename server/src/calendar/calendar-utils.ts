@@ -45,6 +45,7 @@ export async function getCalendarEntries(req: Request, res: Response, db: Databa
     }
 }
 
+
 export async function updateCalendarEntry(req: Request, res: Response, db: Database) {
     try {
         const { id } = req.params;
