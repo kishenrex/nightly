@@ -7,7 +7,7 @@ import ChecklistPage from './pages/Checklist';
 import LandingPage from "./pages/LandingPage";
 import TimerPage from './pages/TimerPage';
 import AvatarPage from './pages/AvatarPage';
-import Settings from './pages/Settings/Settings';
+import Settings from './pages/Settings';
 import { AvatarProvider } from './context/AvatarContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { TimerProvider } from './context/TimerContext';

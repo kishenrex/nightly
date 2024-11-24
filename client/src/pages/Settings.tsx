@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
-import HomeButton from '../../components/HomeButton';
-import { ThemeContext } from '../../context/ThemeContext';
-import './Settings.css';
+import HomeButton from '../components/HomeButton';
+import { ThemeContext } from '../context/ThemeContext';
 
 const Settings: React.FC = () => {
   const { theme } = useContext(ThemeContext);
