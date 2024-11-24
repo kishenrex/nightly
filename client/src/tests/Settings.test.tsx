@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import App from '../App';
+import '@testing-library/jest-dom/extend-expect';
+import Settings from '../pages/Settings'; 
 
 describe('Settings Is There', () => {
     test('shows the Settings page with all options', () => {

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import '../styles/TimerPageStyles.css';
 import {Button, Modal} from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -8,7 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 import { ThemeContext } from '../context/ThemeContext';
 import { TimerContext } from '../context/TimerContext';
+import axios from 'axios';
 
+const API_BASE_URL = 'http://localhost:3001'; // Backend base URL
 
 function TimerPage(): JSX.Element {
 const [show, setShow] = useState(false);
@@ -21,13 +23,61 @@ const [minutes, setMinutes] = useState(0);
 const [seconds, setSeconds] = useState(0);
 const {theme} = useContext(ThemeContext);
 const {time, setTime, running, setRunning} = useContext(TimerContext);
+const [calendarEntries, setCalendarEntries] = useState([]); // To store fetched calendar data
+const [error, setError] = useState<string | null>(null);
+const [isLoading, setIsLoading] = useState(true);
 
 let navigate = useNavigate(); 
   const routeChange = () =>{ 
     let path = `/calendar`;
     navigate(path);
   }
+// Function to send timer data to the backend
+  const sendToBackend = async () => {
+    try {
+      const calendarEntry = {
+        id: crypto.randomUUID(), // Generate a unique ID
+        email: 'user@example.com', // Replace with dynamic user email
+        calendar_day: new Date().toISOString().split('T')[0], // Current date
+        time_start: new Date().toISOString(), // Replace with actual start time
+        time_end: new Date().toISOString(), // Replace with actual end time
+        time_slept: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
+        checklist: JSON.stringify([]),
+        desired_bedtime: '22:00:00', // Example static value
+        desired_reminder_time: '21:30:00', // Example static value
+      };
 
+      const response = await axios.post(`${API_BASE_URL}/calendar`, calendarEntry);
+      console.log('Timer data sent successfully:', response.data);
+    } catch (error) {
+      console.error('Error sending timer data to backend:', error);
+      setError('Failed to save timer data. Please try again.');
+    }
+  };
+  
+  const fetchCalendarEntries = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/calendar`); // Backend endpoint
+      const { data } = await response.json();
+      console.log('Fetched calendar entries:', data);
+    } catch (err) {
+      console.error('Error fetching calendar entries:', err);
+    }
+  };
+
+  // Initialize calendar data on component mount
+  useEffect(() => {
+    fetchCalendarEntries();
+  }, []);
+
+
+  const handleConfirm = async () => {
+    console.log('Saving timer data to backend...');
+    await sendToBackend(); // Send data to the backend
+    setShow(false);
+    setTime(0);
+    routeChange(); // Navigate to home or calendar page
+  };
 const handleEdit = () => {
   setEdit(true);
   setShow(false);
@@ -37,10 +87,7 @@ const handleClose = () => {
   setShow(false)
   setEdit(false);
 };
-const handleConfirm = () => {
-  setTime(0);
-  setShow(false);
-};
+
 const handleShow = () => {
   if (running){
     setShow(true);
