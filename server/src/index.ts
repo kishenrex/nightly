@@ -1,28 +1,58 @@
 import express from 'express';
-import db from './db';  
+import cors from 'cors';
+import initDB from './initDB';
+import { createUserEndpoints } from './user/user-endpoints';
+import { createCalendarEndpoints } from './calendar/calendar-endpoints';
+import { Database } from 'sqlite';
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-//get the information for sleep-logs inputted
-app.get('/sleep-logs', (req, res) => {
-    db.all('SELECT * FROM sleep_logs', [], (err, rows) => {
-        if (err) {
-            res.status(500).send({ error: 'Database error' });
-            return;
-        }
-        res.json(rows);
-    });
-});
+// Database and Server initialization
+async function startServer() {
+    try {
+        // Initialize database
+        const db: Database = await initDB();
+        console.log('Database initialized successfully');
 
-// Basic test route
-app.get('/', (req, res) => {
-  res.send('Hello from Express with TypeScript!');
-});
+        // Create endpoints
+        createUserEndpoints(app, db);
+        createCalendarEndpoints(app, db);
+        console.log('Endpoints created successfully');
+
+        // Basic health check endpoint
+        app.get('/health', (req, res) => {
+            res.status(200).send({ status: 'OK' });
+        });
+
+        // Error handling middleware
+        app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.error(err.stack);
+            res.status(500).send({ error: 'Something went wrong!' });
+        });
+
+        // Start the server
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
+
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+startServer().catch(console.error);
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    process.exit(0);
 });
+
+export default app;

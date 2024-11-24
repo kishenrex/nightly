@@ -14,7 +14,7 @@ return (
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
     minHeight: '100vh',
-    }}className='backgroundImage' role="img">
+    }}className='backgroundImage' role="img" aria-label='backgroundImage'>
 
   <div style={{ display: 'flex', alignItems: 'center',justifyContent: 'center', gap: '0.75rem', 
   color: theme.fontColor, padding: '15px' }}>

@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Modal, Form } from 'react-bootstrap';
+import { Button, Modal, Form, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import HomeButton from '../components/HomeButton';
@@ -12,34 +12,131 @@ type ProfileField = {
   value: string;
   type?: string;
   masked?: boolean;
+  key: 'username' | 'password' | 'email';
+};
+
+type User = {
+  email: string;
+  username: string;
+  avatar: string | null;
+  streak: number;
+};
+
+const API_BASE_URL = 'http://localhost:3001';
+
+const DEFAULT_USER = {
+  email: 'johnnyappleseed@nightly.com',
+  username: 'JohnMachine222',
+  password: 'mySecurePassword123',
+  avatar: null,
+  streak: 0
 };
 
 const ProfilePage: React.FC = () => {
-  const {theme} = useContext(ThemeContext);
+  const [user, setUser] = useState<User>(DEFAULT_USER);
   const [profileFields, setProfileFields] = useState<ProfileField[]>([
-    { label: 'Username', value: 'JohnMachine222' },
-    { label: 'Password', value: 'mySecurePassword123', type: 'password', masked: true },
-    { label: 'Email', value: 'johnnyappleseed@nightly.com' }
+    { label: 'Username', value: DEFAULT_USER.username, key: 'username' },
+    { label: 'Password', value: '••••••••••••••', type: 'password', masked: true, key: 'password' },
+    { label: 'Email', value: DEFAULT_USER.email, key: 'email' }
   ]);
-
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [editValue, setEditValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const {theme} = useContext(ThemeContext);
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
+        // First try to create the user
+        const createResponse = await fetch(`${API_BASE_URL}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(DEFAULT_USER)
+        });
+
+        // Then fetch the user data
+        const getResponse = await fetch(`${API_BASE_URL}/users/${DEFAULT_USER.email}`);
+        
+        if (!getResponse.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        const { data } = await getResponse.json();
+
+        setUser({
+          email: data.email,
+          username: data.username,
+          avatar: data.avatar,
+          streak: data.streak || 0
+        });
+
+        setProfileFields([
+          { label: 'Username', value: data.username, key: 'username' },
+          { label: 'Password', value: '••••••••••••••', type: 'password', masked: true, key: 'password' },
+          { label: 'Email', value: data.email, key: 'email' }
+        ]);
+      } catch (err) {
+        console.error('Error initializing user:', err);
+        setError('Failed to load user data. Please refresh the page.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeUser();
+  }, []);
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
-    setEditValue(profileFields[index].value);
+    const field = profileFields[index];
+    setEditValue(field.type === 'password' ? '' : field.value);
     setShowModal(true);
   };
 
-  const handleSave = () => {
-    if (editValue.trim()) {
-      setProfileFields(prev => prev.map((field, index) => 
-        index === editingIndex ? { ...field, value: editValue } : field
+  const handleSave = async () => {
+    if (!editValue.trim() || editingIndex === -1) return;
+
+    const field = profileFields[editingIndex];
+    
+    try {
+      setError(null);
+
+      const response = await fetch(`${API_BASE_URL}/users/${user.email}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [field.key]: editValue
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user data');
+      }
+
+      // Update local state
+      setProfileFields(prev => prev.map((f, index) => 
+        index === editingIndex 
+          ? { ...f, value: field.type === 'password' ? '••••••••••••••' : editValue }
+          : f
       ));
+
+      if (field.key === 'username') {
+        setUser(prev => ({ ...prev, username: editValue }));
+      }
+
       setShowModal(false);
+    } catch (err) {
+      console.error('Update error:', err);
+      setError('Failed to update user data. Please try again.');
     }
   };
 
@@ -107,6 +204,16 @@ const ProfilePage: React.FC = () => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -132,25 +239,17 @@ const ProfilePage: React.FC = () => {
           }}>
             Profile
           </h1>
-          <Link to="/calendar">
-            {/*<Button 
-              variant="dark" 
-              style={{ 
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '48px',
-                height: '48px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >*/}
-              <HomeButton></HomeButton>
-             {/*<i className="bi bi-house-fill" style={{ fontSize: '1.5rem' }}></i> */} 
-            {/*</Button>*/}
-          </Link>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <span>Streak: {user.streak} days</span>
+            <HomeButton></HomeButton>
+          </div>
         </div>
+
+        {error && (
+          <Alert variant="danger" className="mb-3" onClose={() => setError(null)} dismissible>
+            {error}
+          </Alert>
+        )}
 
         <div style={{ 
           display: 'flex', 
@@ -184,31 +283,43 @@ const ProfilePage: React.FC = () => {
               justifyContent: 'center',
               alignItems: 'center'
             }}>
-              <div style={{
-                width: '160px',
-                height: '160px',
-                backgroundColor: '#A0A0A0',
-                borderRadius: '50%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
+              {user.avatar ? (
+                <img 
+                  src={user.avatar} 
+                  alt="User avatar" 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }}
+                />
+              ) : (
                 <div style={{
-                  width: '120px',
-                  height: '120px',
-                  backgroundColor: '#4A4A4A',
+                  width: '160px',
+                  height: '160px',
+                  backgroundColor: '#A0A0A0',
                   borderRadius: '50%',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center'
                 }}>
-                  <UserAvatar/>
-                  {/*<i className="bi bi-person-fill" style={{ 
-                    fontSize: '60px',
-                    color: '#A0A0A0'
-                  }}></i>*/}
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    backgroundColor: '#4A4A4A',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}>
+                    <i className="bi bi-person-fill" style={{ 
+                      fontSize: '60px',
+                      color: '#A0A0A0'
+                    }}></i>
+                  </div>
                 </div>
-              </div>
+              )}
               <Link to="/avatars">
                 <Button
                   variant="link"
