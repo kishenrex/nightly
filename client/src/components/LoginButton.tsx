@@ -7,14 +7,17 @@ import { ThemeContext } from '../context/ThemeContext';
 
 interface User {
   access_token: string;
-}
+};
 
 interface Profile {
   picture: string;
   name: string;
   email: string;
-}
+};
 
+function googleLoginProcedure(): void {
+  window.open("http://localhost:3001/auth/google", "_self")
+}
 
 function LoginButton(): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
