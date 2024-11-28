@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import HomeButton from '../components/HomeButton';
 import { ThemeContext } from '../context/ThemeContext';
+import '../styles/Settings.css';
 
 const Settings: React.FC = () => {
   const { theme } = useContext(ThemeContext);
@@ -15,7 +16,7 @@ const Settings: React.FC = () => {
         <HomeButton></HomeButton>
       </div>
 
-    <div style= {{ backgroundColor: theme.background, color: theme.fontColor }}className="settings-container">
+    <div style= {{ backgroundColor: theme.background, color: theme.fontColor,  }}className="settings-container">
       <h1 style= {{ backgroundColor: theme.background, color: theme.fontColor }}className="settings-title">Settings</h1>
       
       <div className="settings-option">

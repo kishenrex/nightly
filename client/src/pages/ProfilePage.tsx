@@ -6,6 +6,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import HomeButton from '../components/HomeButton';
 import { UserAvatar } from '../components/UserAvatar';
 import { ThemeContext } from '../context/ThemeContext';
+import { AvatarContext } from '../context/AvatarContext';
 
 type ProfileField = {
   label: string;
@@ -28,7 +29,7 @@ const DEFAULT_USER = {
   email: 'johnnyappleseed@nightly.com',
   username: 'JohnMachine222',
   password: 'mySecurePassword123',
-  avatar: null,
+  avatar: 'pokemon_starters.jpeg',
   streak: 0
 };
 
@@ -46,6 +47,7 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const {theme} = useContext(ThemeContext);
+  const {avatar} = useContext(AvatarContext);
   useEffect(() => {
     const initializeUser = async () => {
       try {
@@ -132,7 +134,6 @@ const ProfilePage: React.FC = () => {
       if (field.key === 'username') {
         setUser(prev => ({ ...prev, username: editValue }));
       }
-
       setShowModal(false);
     } catch (err) {
       console.error('Update error:', err);
@@ -240,7 +241,7 @@ const ProfilePage: React.FC = () => {
             Profile
           </h1>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <span>Streak: {user.streak} days</span>
+            <span style={{color: theme.fontColor}}>Streak: {user.streak} days</span>
             <HomeButton></HomeButton>
           </div>
         </div>
@@ -313,10 +314,7 @@ const ProfilePage: React.FC = () => {
                     justifyContent: 'center',
                     alignItems: 'center'
                   }}>
-                    <i className="bi bi-person-fill" style={{ 
-                      fontSize: '60px',
-                      color: '#A0A0A0'
-                    }}></i>
+                    <UserAvatar></UserAvatar>
                   </div>
                 </div>
               )}

@@ -126,11 +126,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           <span style={{ fontSize: '2rem', fontWeight: '600' }}>Nightly</span>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <Link to="/timer" className="text-decoration-none">
             <Button  style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2">
               <i className="bi bi-clock fs-5"></i>
-              <span>Sleep Timer</span>
+              <span>Sleep Stopwatch</span>
             </Button>
           </Link>
 
@@ -142,15 +142,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             <Badge bg="success" className="fs-6">100</Badge>
           </div>
 
-          <div className="text-white text-center border-start border-end px-3">
-            <div style={{color:theme.fontColor}} className="d-flex align-items-center gap-2">
-              <i className="bi bi-fire"></i>
-              <span>Current Streak</span>
-            </div>
-            <Badge bg="success" className="fs-6">100</Badge>
-          </div>
-
-          <div className="text-white text-center border-start border-end px-3">
+          <div className="text-center border-start border-end px-3">
             <div style={{color:theme.fontColor}} className="d-flex align-items-center gap-2">
               <i className="bi bi-fire"></i>
               <span>Max Streak</span>
@@ -158,19 +150,17 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             <Badge bg="success" className="fs-6">100</Badge>
           </div>
           
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-5">
             <Link to="/profile" className="text-white">
               <UserAvatar/>
             </Link>
-              <ToggleThemeButton></ToggleThemeButton>
+            <div style={{paddingRight: '20px'}}>
+                <ToggleThemeButton></ToggleThemeButton>
+            </div>
+
           </div>
 
-          <Link to="/settings" className="text-decoration-none">
-            <Button style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2">
-              <i className="bi bi-gear fs-5"></i>
-              Settings
-            </Button>
-          </Link>
+      
         </div>
       </div>
 
@@ -616,17 +606,16 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
               <div key={index} className="d-flex align-items-center justify-content-between mb-3">
                 <div style={{ width: "90%", maxWidth: "90%", wordBreak: "break-word", 
                     overflowWrap: "break-word", borderStyle: "solid", 
-                    borderRadius: "5px", borderColor: "white", borderWidth: "1px", padding: "8px"}}>
+                    borderRadius: "5px", borderColor: theme.borderColor, borderWidth: "1px", padding: "8px"}}>
                     <Form.Check 
                     type="checkbox"
                     id={`routine-${index}`}
                     label={routine.title}
                     checked={routine.completed}
                     onChange={() => onToggleRoutine(index)}
-                    className="text-white flex-grow-1"
-                    style={{ fontSize: '1.1rem', paddingRight: '1rem' }}
+                    style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor }}
                     />
-                    <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white', margin: "0px" }}> {routine.text} </p>
+                    <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor, margin: "0px" }}> {routine.text} </p>
                 </div>
                 <div>
                 <Button 
@@ -637,7 +626,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                     setNewRoutine(routine.text);
                     setCurrIndex(index);
                   }}
-                  style={{ padding: '0.2rem 0.4rem', margin: "4px" }}
+                  style={{ padding: '0.2rem 0.4rem', margin: "4px", color: theme.fontColor,  borderColor: theme.borderColor }}
                   variant="outline-light" 
                 >
                   <i className="bi bi-pencil-square"></i>
@@ -645,7 +634,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                 <Button 
                   size="sm"
                   onClick={() => onDeleteRoutine(index)}
-                  style={{ padding: '0.2rem 0.4rem', margin: "4px", display: "block" }}
+                  style={{ padding: '0.2rem 0.4rem', margin: "4px", display: "block" , color: theme.fontColor, borderColor: theme.borderColor}}
                   variant="outline-light" 
                 >
                   <i className="bi bi-dash-lg"></i>
