@@ -1,7 +1,6 @@
 import { useState } from "react";
 import '../styles/checklist.css';
 import { Link } from 'react-router-dom';
-import { addDays } from 'date-fns';
 import { 
   Button,
   Badge,
@@ -12,47 +11,90 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
+
+// const CheckList = () => {
+// const [tasks, setTasks] = useState("temp");
+// const [editTitle, setEditTitle] = useState("None");
+
+// function handleCheckboxClick(e: React.ChangeEvent<HTMLInputElement>) {
+//     const checkbox: HTMLInputElement = e.target as HTMLInputElement;
+
+//   }
+
+// function handleButtonClick(e: React.MouseEvent<HTMLButtonElement>) {
+
+//     const title = e.currentTarget.name;
+//     setEditTitle(title);
+// }
+
+// return (
+//     <div className="page">
+//         <div className="grid">
+//             <div className="box-left">
+//                 <h2> Night Routine Checklist </h2>
+//                 <ul>
+//                     {ListItem("Night Routine 1", "Brush your teeth", handleCheckboxClick, handleButtonClick)}
+//                     {ListItem("Night Routine 2", "Drink a cup of water", handleCheckboxClick, handleButtonClick)}
+//                 </ul>
+//             </div>
+//             <div className="box-right">
+//                     <h2> {editTitle} </h2>
+//             </div>
+//         </div>
+//     </div>
+// );
+// };
+
+
+// function ListItem(title: string, description: string, checkHandler: ChangeEventHandler, buttonHandler: MouseEventHandler) {
+//     return (
+//         <div>
+//             <button onClick={buttonHandler} name={title}>
+//             <li>
+//                 <input
+//                     type="checkbox"
+//                     onChange={checkHandler}
+//                     // checked={}
+//                     name={title}
+//                     />
+//                     {" " + title + ": "}
+//                     {description}
+//             </li>
+//             </button>
+//         </div>
+//     );
+//   }
+
+
 // Types
-type Routine = {
+export type Routine = {
   title: string;
   text: string;
   completed: boolean;
 };
 
-type RoutinesMap = {
+export type RoutinesMap = {
   [dateKey: string]: Routine[];
 };
 
-type TimeMap = {
-  [dateKey: string]: string;
-};
-
-type NightRoutineProps = {
-  selectedDate: Date;
+export type NightRoutineProps = {
+  selectedDate: Date | null;
   routines: Routine[];
-  routinesByDate: RoutinesMap;
-  bedTime: string;
-  timesByDate: TimeMap;
-  onAddTime: (newDate: Date, bedTime: string) => void;
-  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string) => void;
-  onEditRoutine: (newDate: Date, routineTitle: string, routineText: string, index: number) => void;
+  onAddRoutine: (routineTitle: string, routineText: string) => void;
   onToggleRoutine: (index: number) => void;
   onDeleteRoutine: (index: number) => void;
-  onDeleteAllRoutine: (date: Date) => void;
 };
 
 type CalendarProps = {
   onSelectDate: (date: Date) => void;
-  selectedDate: Date;
-  timesByDate: TimeMap;
+  selectedDate: Date | null;
 };
 
 const ChecklistPage: React.FC = (): JSX.Element => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
-  const [timesByDate, setTimesByDate] = useState<TimeMap>({});
 
-  const getDateKey = (date: Date): string => {
+  const getDateKey = (date: Date | null): string => {
     return date ? date.toISOString().split('T')[0] : '';
   };
 
@@ -60,29 +102,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     setSelectedDate(date);
   };
 
-  const handleAddTime = (date: Date, bedTime: string): void => {
-    const dateKey = getDateKey(date);
-    setTimesByDate(prev => ({
-      ...prev,
-      [dateKey]: bedTime
-    }));
-  };
-
-  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string): void => {
-    const dateKey = getDateKey(date);
+  const handleAddRoutine = (routineTitle: string, routineText: string): void => {
+    const dateKey = getDateKey(selectedDate);
     setRoutinesByDate(prev => ({
       ...prev,
       [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: false }]
-    }));
-  };
-
-  const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number): void => {
-    const dateKey = getDateKey(date);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].map((routine, i) => 
-        i === index ? { title: routineTitle, text: routineText, completed: routine.completed } : routine
-      )
     }));
   };
 
@@ -101,14 +125,6 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     setRoutinesByDate(prev => ({
       ...prev,
       [dateKey]: prev[dateKey].filter((_, i) => i !== index)
-    }));
-  };
-
-  const deleteAllRoutine = (date: Date): void => {
-    const dateKey = getDateKey(date);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: []
     }));
   };
 
@@ -133,14 +149,6 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             <div className="d-flex align-items-center gap-2">
               <i className="bi bi-fire"></i>
               <span>Current Streak</span>
-            </div>
-            <Badge bg="success" className="fs-6">100</Badge>
-          </div>
-
-          <div className="text-white text-center border-start border-end px-3">
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-fire"></i>
-              <span>Max Streak</span>
             </div>
             <Badge bg="success" className="fs-6">100</Badge>
           </div>
@@ -175,35 +183,28 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             <Calendar 
               onSelectDate={handleSelectDate}
               selectedDate={selectedDate}
-              timesByDate={timesByDate}
             />
           </div>
 
           {/* Routine Panel */}
           <div style={{ 
-            width: '550px', 
+            width: '500px', 
             backgroundColor: '#1a103f', 
             borderRadius: '0.5rem', 
             padding: '1.5rem',
             display: 'flex',
             flexDirection: 'column'
           }}>
-            <h4 className="text-white mb-4">
+            <h2 className="text-white mb-4">
               <i className="bi bi-moon-stars me-2"></i>
-              Night Routine for {selectedDate?.toDateString()}
-            </h4>
+              Night Routine for the Day
+            </h2>
             <NightRoutine 
               selectedDate={selectedDate}
               routines={routinesByDate[getDateKey(selectedDate)] || []}
-              routinesByDate={routinesByDate}
-              bedTime = {timesByDate[getDateKey(selectedDate)] || "00:00"}
-              timesByDate={timesByDate}
               onAddRoutine={handleAddRoutine}
-              onEditRoutine={handleEditRoutine}
               onToggleRoutine={handleToggleRoutine}
               onDeleteRoutine={handleDeleteRoutine}
-              onDeleteAllRoutine={deleteAllRoutine}
-              onAddTime={handleAddTime}
             />
           </div>
         </div>
@@ -212,7 +213,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate }): JSX.Element => {
+const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate }): JSX.Element => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
   const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -221,28 +222,6 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
   const firstDayWeekday = firstDayOfMonth.getDay();
   const daysInMonth = lastDayOfMonth.getDate();
-
-  const getDateKey = (date: Date): string => {
-    return date ? date.toISOString().split('T')[0] : '';
-  };
-
-  const convertTime = (time: string) => {
-    if (!time) {
-      return;
-    }
-    const [hours, minutes] = time.split(':').map(Number);
-    let period = 'am';
-
-    let newHours = hours;
-    if (hours >= 12) {
-      period = 'pm';
-      if (hours > 12) newHours = hours - 12;
-    } else if (hours === 0) {
-      newHours = 12;
-    }
-
-    return `${newHours}:${minutes.toString().padStart(2, '0')}${period}`;
-  };
 
   const calendarDays = Array(35).fill(null).map((_, index) => {
     const dayNumber = index - firstDayWeekday + 1;
@@ -299,8 +278,7 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
                       }}
                     >
                       <div className="d-flex align-items-center justify-content-center h-100">
-                        <span style={{ fontSize: '1.1rem' }}>{dayNumber || ''} <br/> 
-                        {dayNumber && convertTime(timesByDate[getDateKey(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber || 0))])} </span>
+                        <span style={{ fontSize: '1.1rem' }}>{dayNumber || ''}</span>
                       </div>
                     </td>
                   );
@@ -317,292 +295,75 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
 const NightRoutine: React.FC<NightRoutineProps> = ({ 
   selectedDate, 
   routines, 
-  routinesByDate,
-  bedTime,
-  timesByDate,
-  onAddTime,
   onAddRoutine, 
-  onEditRoutine,
   onToggleRoutine, 
-  onDeleteRoutine,
-  onDeleteAllRoutine
+  onDeleteRoutine 
 }): JSX.Element => {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [showModalRep, setShowModalRep] = useState<boolean>(false);
-  const [showModalTime, setShowModalTime] = useState<boolean>(false);
-  const [showModalEdit, setShowModalEdit] = useState<boolean>(false);
-  const [bedTimeText, setBedTimeText] = useState({
-    text: 'Bedtime',
-    icon: 'bi bi-cloud-moon'});
-
   const [newTitle, setNewTitle] = useState<string>('');
   const [newRoutine, setNewRoutine] = useState<string>('');
   const [newRepeat, setNewRepeat] = useState<string[]>([]);
-  const [currIndex, setCurrIndex] = useState<number>(0);
-  const [numRepeat, setNumRepeat] = useState<number>(1);
-
-  const isActiveKeys = {
-    'Sun': false,
-    'Mon': false,
-    'Tue': false,
-    'Wed': false,
-    'Thu': false,
-    'Fri': false,
-    'Sat': false,
-  };
-  const [isActive, setIsActive] = useState<typeof isActiveKeys>(isActiveKeys);
-
-  const convertTime = (time: string) => {
-    if (!time) {
-      return "";
-    }
-    const [hours, minutes] = time.split(':').map(Number);
-    let period = 'am';
-
-    let newHours = hours;
-    if (hours >= 12) {
-      period = 'pm';
-      if (hours > 12) newHours = hours - 12;
-    } else if (hours === 0) {
-      newHours = 12;
-    }
-
-    return `${newHours}:${minutes.toString().padStart(2, '0')}${period}`;
-  };
-
-  const openAddRoutine = (): void => {
-    setNewTitle('');
-    setNewRoutine('');
-    setShowModal(true);
-  }
-
-  const repeatAddRoutine = (date: Date) => {
-    const dateKey = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
-    onDeleteAllRoutine(date);
-    routinesByDate[dateKey]?.forEach(rout => {
-      onAddRoutine(date, rout.title, rout.text);
-    });
-    onAddTime(date, timesByDate[dateKey]);
-  }
 
   const handleSubmit = (): void => {
-    if (newTitle.trim()) {
-      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim());
+    if (newRoutine.trim()) {
+      onAddRoutine(newTitle.trim(), newRoutine.trim());
+      setNewTitle('');
+      setNewRoutine('');
+      setNewRepeat([]);
       setShowModal(false);
     }
   };
 
-  const handleSubmitEdit = (): void => {
-    if (newTitle.trim()) {
-      onEditRoutine(selectedDate, newTitle.trim(), newRoutine.trim(), currIndex);
-      setShowModalEdit(false);
-    }
-  };
-
-  const handleSubmitRep = (): void => {
-    if (newRepeat.length > 0) {
-      const day = selectedDate?.getDay();
-      let populate = numRepeat;
-      let updated = null;
-      newRepeat.forEach(element => {
-        populate =numRepeat;
-        updated = selectedDate;
-        switch(element) {
-          case "Sun":
-            updated = addDays(selectedDate, 0-day);
-            if (day !== 0) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-
-            break;
-          case "Mon":
-            updated = addDays(selectedDate, 1-day);
-            if (day !== 1) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-            break;
-          case "Tue":
-            updated = addDays(selectedDate, 2-day);
-            if (day !== 2) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-            break;
-          case "Wed":
-            updated = addDays(selectedDate, 3-day);
-            if (day !== 3) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-            break;
-          case "Thu":
-            updated = addDays(selectedDate, 4-day);
-            if (day !== 4) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-            break;
-          case "Fri":
-            updated = addDays(selectedDate, 5-day);
-            if (day !== 5) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-            break;
-          case "Sat":
-            updated = addDays(selectedDate, 6-day);
-            if (day !== 6) {
-              repeatAddRoutine(updated);
-            }
-            updated = addDays(updated, 7);
-            
-            while (populate > 0) {
-              repeatAddRoutine(updated);
-              populate -= 1;
-              updated = addDays(updated, 7);
-            }
-            break;
-          default:
-            break;
-        }
-      });
-    }
-
-    setNumRepeat(1);
-    setNewRepeat([]);
-    setIsActive((prevState) => ({...prevState, ["Sun"]: false}));
-    setIsActive((prevState) => ({...prevState, ["Mon"]: false}));
-    setIsActive((prevState) => ({...prevState, ["Tue"]: false}));
-    setIsActive((prevState) => ({...prevState, ["Wed"]: false}));
-    setIsActive((prevState) => ({...prevState, ["Thu"]: false}));
-    setIsActive((prevState) => ({...prevState, ["Fri"]: false}));
-    setIsActive((prevState) => ({...prevState, ["Sat"]: false}));
-    setShowModalRep(false);
-  };
-
-  const handleMouseEnter = () => {
-    setBedTimeText({
-      text: convertTime(bedTime), 
-      icon: 'bi bi-cloud-moon', 
-    });
-  };
-
-  // Revert content when mouse leaves
-  const handleMouseLeave = () => {
-    setBedTimeText({
-      text: 'Bedtime',  
-      icon: 'bi bi-cloud-moon', 
-    });
-  };
-
-  const handleDayClick = (day: string) => {
-    if (newRepeat.includes(day)) {
-        const filtered = newRepeat.filter(aDay => aDay !== day);
+  const handleDayClick = (newDay: string) => {
+    if (newRepeat.includes(newDay)) {
+        const filtered = newRepeat.filter(aDay => aDay !== newDay);
         setNewRepeat([...filtered]);
-        setIsActive((prevState) => ({...prevState, [day]: false}));
     }
     else {
-        setNewRepeat([...newRepeat, day])
-        setIsActive((prevState) => ({...prevState, [day]: true}));
+        setNewRepeat([...newRepeat, newDay])
     }
   }
 
-  const handleWeekInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (value > 52) {
-      setNumRepeat(52);
-    } 
-    else if (value < 1) {
-      setNumRepeat(1);
-    }
-    else {
-      setNumRepeat(value);
-    }
-  }
-
-  const WeekRecurrence = () => {
+  const WeekRecurrence = (props: { name: string }) => {
     return (
-    <div >
+    <div>
         <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>Repeat on: </h4>
         <div style={{ display: 'inline-flex', marginBottom: "20px" }}>
-            <DayButton day={"Sun"} />
-            <DayButton day={"Mon"} />
-            <DayButton day={"Tue"} />
-            <DayButton day={"Wed"} />
-            <DayButton day={"Thu"} />
-            <DayButton day={"Fri"} />
-            <DayButton day={"Sat"} />
+            <DayButton day={"Su"} />
+            <DayButton day={"Mo"} />
+            <DayButton day={"Tu"} />
+            <DayButton day={"We"} />
+            <DayButton day={"Th"} />
+            <DayButton day={"Fr"} />
+            <DayButton day={"Sa"} />
         </div>
-        <br/>
         <div style={{ display: 'inline-flex' }}>
             <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>For</h4>
-            <input type="number" min="1" max="52" style={{backgroundColor: "transparent", color: "white", 
-                borderColor: "white", borderRadius: "5px", width: "30%", marginRight: "15px"}}
-                onBlur={handleWeekInput}></input>
-            <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>Week(s)</h4>
+            <input style={{backgroundColor: "transparent", color: "white", 
+                borderColor: "white", borderRadius: "5px", width: "10%", marginRight: "15px"}}></input>
+            <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>days</h4>
         </div>
     </div>
     );
   };
 
-    const DayButton = (props: { day: keyof typeof isActiveKeys}) => {
+    const DayButton = (props: { day: string }) => {
         return (
-            <Button className={`${isActive[props.day] ? 'active' : ''}`} variant="outline-light" data-bs-toggle="button"
-                style={{ margin: '2px 4px', padding: '6px 12px' }}
+            <Button variant="outline-light" 
+                style={{ margin: '5px 10px', padding: '6px 12px' }}
                 onClick={() => handleDayClick(props.day)}
             > {props.day} </Button> 
         );
     };
-    
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, maxHeight:"90%" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
       <div style={{ flex: '1', overflowY: 'auto', marginBottom: '1rem' }}>
         {selectedDate ? (
           <Form>
             {routines.map((routine, index) => (
               <div key={index} className="d-flex align-items-center justify-content-between mb-3">
-                <div style={{ width: "90%", maxWidth: "90%", wordBreak: "break-word", 
-                    overflowWrap: "break-word", borderStyle: "solid", 
-                    borderRadius: "5px", borderColor: "white", borderWidth: "1px", padding: "8px"}}>
+                <div style={{ width: "80%", wordWrap: "break-word"}}>
                     <Form.Check 
                     type="checkbox"
                     id={`routine-${index}`}
@@ -612,31 +373,16 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                     className="text-white flex-grow-1"
                     style={{ fontSize: '1.1rem', paddingRight: '1rem' }}
                     />
-                    <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white', margin: "0px" }}> {routine.text} </p>
+                    <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}> {routine.text} </p>
                 </div>
-                <div>
                 <Button 
-                  size="sm"
-                  onClick={(e) => {
-                    setShowModalEdit(true);
-                    setNewTitle(routine.title);
-                    setNewRoutine(routine.text);
-                    setCurrIndex(index);
-                  }}
-                  style={{ padding: '0.2rem 0.4rem', margin: "4px" }}
-                  variant="outline-light" 
-                >
-                  <i className="bi bi-pencil-square"></i>
-                </Button>
-                <Button 
+                  variant="outline-danger" 
                   size="sm"
                   onClick={() => onDeleteRoutine(index)}
-                  style={{ padding: '0.2rem 0.4rem', margin: "4px", display: "block" }}
-                  variant="outline-light" 
+                  style={{ padding: '0.5rem 0.75rem' }}
                 >
-                  <i className="bi bi-dash-lg"></i>
+                  <i className="bi bi-trash"></i>
                 </Button>
-                </div>
               </div>
             ))}
           </Form>
@@ -645,44 +391,21 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         )}
       </div>
 
-        <div style={{display: "flex"}}>
+      <WeekRecurrence name={"Test"}></WeekRecurrence>
+
       <Button 
         variant="outline-light" 
-        onClick={openAddRoutine}
+        className="w-100" 
+        onClick={() => setShowModal(true)}
         size="lg"
-        style={{width: "33%"}}
       >
         <i className="bi bi-plus-lg me-2"></i>
-        Routine
+        Add New Routine
       </Button>
-
-      <Button 
-        variant="outline-light" 
-        onClick={() => setShowModalTime(true)}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        size="lg"
-        style={{width: "33%"}}
-      >
-        <i className={`bi ${bedTimeText.icon}`}></i><br/>
-        {bedTimeText.text}
-      </Button>
-
-      <Button 
-        variant="outline-light" 
-        onClick={() => setShowModalRep(true)}
-        size="lg"
-        style={{width: "33%"}}
-      >
-        <i className="bi bi-arrow-counterclockwise"></i>
-        Repeat
-      </Button>
-      </div>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} 
         size="lg" centered >
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
-        <Modal.Header closeButton closeVariant="white">
+        <Modal.Header closeButton>
           <Modal.Title>Add New Routine</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -700,75 +423,16 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
           <br/>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-light" onClick={handleSubmit}>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSubmit}>
             Add Routine
           </Button>
         </Modal.Footer>
-        </div>
-      </Modal>
-
-      <Modal show={showModalEdit} onHide={() => setShowModalEdit(false)} 
-        size="lg" centered >
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
-        <Modal.Header closeButton closeVariant="white">
-          <Modal.Title>Edit Routine</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <FormControl
-            placeholder="Enter routine"
-            value={newTitle}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
-          />
-          <br/>
-          <FormControl
-            placeholder="Enter routine description (optional)"
-            value={newRoutine}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
-          />
-          <br/>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="outline-light" onClick={handleSubmitEdit}>
-            Finish
-          </Button>
-        </Modal.Footer>
-        </div>
-      </Modal>
-
-      <Modal show={showModalRep} onHide={() => setShowModalRep(false)} 
-        size="lg" centered>
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
-        <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
-          <Modal.Title>Set Recurring Days</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <WeekRecurrence/>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="outline-light" onClick={handleSubmitRep}>
-            Complete
-          </Button>
-        </Modal.Footer>
-        </div>
-      </Modal>
-
-      <Modal show={showModalTime} onHide={() => setShowModalTime(false)} 
-        size="lg" centered>
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
-        <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
-          <Modal.Title>Set Bedtime</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <input value={bedTime} type="time" onChange={(e) => {onAddTime(selectedDate, e.target.value)}}> 
-          </input>
-        </Modal.Body>
-        <Modal.Footer>
-        </Modal.Footer>
-        </div>
       </Modal>
     </div>
   );
 };
 
 export default ChecklistPage;
-

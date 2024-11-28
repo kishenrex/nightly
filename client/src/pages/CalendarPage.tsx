@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import '../styles/checklist.css';
 import { Link } from 'react-router-dom';
 import { addDays } from 'date-fns';
@@ -7,10 +7,13 @@ import {
   Badge,
   Form,
   Modal,
-  FormControl
+  FormControl,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { UserAvatar } from '../components/UserAvatar';
+import ToggleThemeButton from '../components/ToggleThemeButton';
+import { ThemeContext } from '../context/ThemeContext';
 
 // Types
 type Routine = {
@@ -112,54 +115,52 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
+  const { theme }  = useContext(ThemeContext);
+
   return (
-    <div style={{ height: '100vh', backgroundColor: '#2d1b69', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', backgroundColor: theme.background, display: 'flex', flexDirection: 'column' }}>
       {/* Simplified Header */}
-      <div style={{ backgroundColor: '#1a103f', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white' }}>
-          <i className="bi bi-moon-stars" style={{ fontSize: '2rem' }}></i>
+      <div style={{ backgroundColor: theme.navbar, padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
+           { theme.boolean ? <i style={{ fontSize: '2rem'}} className="bi bi-sun"></i> : <i style={{ fontSize: '2rem'}} className="bi bi-moon-stars"></i>}
           <span style={{ fontSize: '2rem', fontWeight: '600' }}>Nightly</span>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <Link to="/timer" className="text-decoration-none">
-            <Button variant="outline-light" className="d-flex align-items-center gap-2">
+            <Button  style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2">
               <i className="bi bi-clock fs-5"></i>
-              <span>Sleep Timer</span>
+              <span>Sleep Stopwatch</span>
             </Button>
           </Link>
 
           <div className="text-white text-center border-start border-end px-3">
             <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-fire"></i>
-              <span>Current Streak</span>
+              <i style={{color: theme.fontColor}}className="bi bi-fire"></i>
+              <span style={{color: theme.fontColor}}>Current Streak</span>
             </div>
             <Badge bg="success" className="fs-6">100</Badge>
           </div>
 
-          <div className="text-white text-center border-start border-end px-3">
-            <div className="d-flex align-items-center gap-2">
+          <div className="text-center border-start border-end px-3">
+            <div style={{color:theme.fontColor}} className="d-flex align-items-center gap-2">
               <i className="bi bi-fire"></i>
               <span>Max Streak</span>
             </div>
             <Badge bg="success" className="fs-6">100</Badge>
           </div>
           
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-5">
             <Link to="/profile" className="text-white">
-              <i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>
+              <UserAvatar/>
             </Link>
-            <Button variant="outline-light" className="ms-2">
-              <i className="bi bi-moon-stars"></i>
-            </Button>
+            <div style={{paddingRight: '20px'}}>
+                <ToggleThemeButton></ToggleThemeButton>
+            </div>
+
           </div>
 
-          <Link to="/settings" className="text-decoration-none">
-            <Button variant="outline-light" className="d-flex align-items-center gap-2">
-              <i className="bi bi-gear fs-5"></i>
-              Settings
-            </Button>
-          </Link>
+      
         </div>
       </div>
 
@@ -167,8 +168,9 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       <div style={{ flex: '1 1 auto', padding: '1.5rem', minHeight: '0' }}>
         <div style={{ display: 'flex', gap: '1.5rem', height: '100%'}}>
           {/* Calendar Panel */}
-          <div style={{ flex: '1 1 auto', width: '80%', backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-            <h2 className="mb-4">
+          <div style={{ flex: '1 1 auto', width: '80%',
+           borderRadius: '0.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column'}}>
+            <h2 style={{color: theme.fontColor}}className="mb-4">
               <i className="bi bi-calendar3 me-2"></i>
               Calendar
             </h2>
@@ -182,15 +184,15 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           {/* Routine Panel */}
           <div style={{ 
             width: '550px', 
-            backgroundColor: '#1a103f', 
             borderRadius: '0.5rem', 
             padding: '1.5rem',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            backgroundColor: theme.foreground
           }}>
-            <h4 className="text-white mb-4">
-              <i className="bi bi-moon-stars me-2"></i>
-              Night Routine for {selectedDate?.toDateString()}
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
+               { theme.boolean ? <i style={{ fontSize: '2rem'}} className="bi bi-sun"></i> : <i style={{ fontSize: '2rem'}} className="bi bi-moon-stars"></i>}
+                Night Routine for {selectedDate?.toDateString()}
             </h4>
             <NightRoutine 
               selectedDate={selectedDate}
@@ -254,23 +256,25 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
     calendarDays.push(...Array(7).fill(null));
   }
 
+  const {theme} = useContext(ThemeContext);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: '1', minHeight: '0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: '1', minHeight: '0'}}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="m-0">
+        <h3 style={{color: theme.fontColor}}className="m-0">
           {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
         </h3>
         <div>
-          <Button variant="outline-primary" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
-            <i className="bi bi-chevron-left"></i>
+          <Button variant="outline-light" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+            <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
           </Button>
-          <Button variant="outline-primary" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
-            <i className="bi bi-chevron-right"></i>
+          <Button variant="outline-light" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+            <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
           </Button>
         </div>
       </div>
 
-      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', minHeight: '0' }}>
+      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', minHeight: '0', background: theme.calendarBackground}}>
         <table className="table table-bordered m-0" style={{ flex: '1', tableLayout: 'fixed' }}>
           <thead>
             <tr>
@@ -561,8 +565,8 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
   const WeekRecurrence = () => {
     return (
     <div >
-        <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>Repeat on: </h4>
-        <div style={{ display: 'inline-flex', marginBottom: "20px" }}>
+        <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor }}>Repeat on: </h4>
+        <div style={{ display: 'inline-flex', marginBottom: "20px",  color: theme.fontColor }}>
             <DayButton day={"Sun"} />
             <DayButton day={"Mon"} />
             <DayButton day={"Tue"} />
@@ -573,11 +577,11 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         </div>
         <br/>
         <div style={{ display: 'inline-flex' }}>
-            <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>For</h4>
-            <input type="number" min="1" max="52" style={{backgroundColor: "transparent", color: "white", 
+            <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem',  color: theme.fontColor  }}>For</h4>
+            <input type="number" min="1" max="52" style={{backgroundColor: "transparent",  color: theme.fontColor , 
                 borderColor: "white", borderRadius: "5px", width: "30%", marginRight: "15px"}}
                 onBlur={handleWeekInput}></input>
-            <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white' }}>Week(s)</h4>
+            <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem',  color: theme.fontColor  }}>Week(s)</h4>
         </div>
     </div>
     );
@@ -586,13 +590,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
     const DayButton = (props: { day: keyof typeof isActiveKeys}) => {
         return (
             <Button className={`${isActive[props.day] ? 'active' : ''}`} variant="outline-light" data-bs-toggle="button"
-                style={{ margin: '2px 4px', padding: '6px 12px' }}
+                style={{ margin: '2px 4px', padding: '6px 12px', borderColor: theme.borderColor, color: theme.fontColor }}
                 onClick={() => handleDayClick(props.day)}
             > {props.day} </Button> 
         );
     };
     
-
+ const { theme }  = useContext(ThemeContext);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, maxHeight:"90%" }}>
       <div style={{ flex: '1', overflowY: 'auto', marginBottom: '1rem' }}>
@@ -602,17 +606,16 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
               <div key={index} className="d-flex align-items-center justify-content-between mb-3">
                 <div style={{ width: "90%", maxWidth: "90%", wordBreak: "break-word", 
                     overflowWrap: "break-word", borderStyle: "solid", 
-                    borderRadius: "5px", borderColor: "white", borderWidth: "1px", padding: "8px"}}>
+                    borderRadius: "5px", borderColor: theme.borderColor, borderWidth: "1px", padding: "8px"}}>
                     <Form.Check 
                     type="checkbox"
                     id={`routine-${index}`}
                     label={routine.title}
                     checked={routine.completed}
                     onChange={() => onToggleRoutine(index)}
-                    className="text-white flex-grow-1"
-                    style={{ fontSize: '1.1rem', paddingRight: '1rem' }}
+                    style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor }}
                     />
-                    <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: 'white', margin: "0px" }}> {routine.text} </p>
+                    <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor, margin: "0px" }}> {routine.text} </p>
                 </div>
                 <div>
                 <Button 
@@ -623,7 +626,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                     setNewRoutine(routine.text);
                     setCurrIndex(index);
                   }}
-                  style={{ padding: '0.2rem 0.4rem', margin: "4px" }}
+                  style={{ padding: '0.2rem 0.4rem', margin: "4px", color: theme.fontColor,  borderColor: theme.borderColor }}
                   variant="outline-light" 
                 >
                   <i className="bi bi-pencil-square"></i>
@@ -631,7 +634,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                 <Button 
                   size="sm"
                   onClick={() => onDeleteRoutine(index)}
-                  style={{ padding: '0.2rem 0.4rem', margin: "4px", display: "block" }}
+                  style={{ padding: '0.2rem 0.4rem', margin: "4px", display: "block" , color: theme.fontColor, borderColor: theme.borderColor}}
                   variant="outline-light" 
                 >
                   <i className="bi bi-dash-lg"></i>
@@ -641,16 +644,16 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             ))}
           </Form>
         ) : (
-          <p className="text-white">Select a day to see routines</p>
+          <p style={{color: theme.fontColor}} className="text-white" >Select a day to see routines</p>
         )}
       </div>
 
         <div style={{display: "flex"}}>
       <Button 
+      style={{color: theme.fontColor, width: "33%", borderColor: theme.borderColor, borderRadius: '5px'}}
         variant="outline-light" 
         onClick={openAddRoutine}
         size="lg"
-        style={{width: "33%"}}
       >
         <i className="bi bi-plus-lg me-2"></i>
         <br/>
@@ -663,27 +666,33 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         size="lg"
-        style={{width: "33%"}}
+        style={{width: "33%", borderColor: theme.borderColor, borderRadius: '5px'}}
       >
-        <i className={`bi ${bedTimeText.icon}`}></i><br/>
+        <i style={{color: theme.fontColor}} className={`bi ${bedTimeText.icon}`}></i><br/>
+         <span style={{color: theme.fontColor}}>
         {bedTimeText.text}
+        </span>
       </Button>
 
       <Button 
         variant="outline-light" 
         onClick={() => setShowModalRep(true)}
         size="lg"
-        style={{width: "33%"}}
+        style={{width: "33%", borderColor: theme.borderColor, borderRadius: '5px'}}
+ 
       >
-        <i className="bi bi-arrow-counterclockwise"></i>
+        <i  style={{color: theme.fontColor}}
+        className="bi bi-arrow-counterclockwise"></i>
         <br/>
+       <span style={{color: theme.fontColor}}>
         Repeat
+        </span> 
       </Button>
       </div>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} 
         size="lg" centered >
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
+          <div style={{backgroundColor: theme.navbar, color:theme.fontColor, borderRadius: '5px'}}>
         <Modal.Header closeButton closeVariant="white">
           <Modal.Title>Add New Routine</Modal.Title>
         </Modal.Header>
@@ -702,7 +711,8 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
           <br/>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-light" onClick={handleSubmit}>
+          <Button style= {{color: theme.fontColor, borderColor: theme.borderColor}}
+           variant="outline-light" onClick={handleSubmit}>
             Add Routine
           </Button>
         </Modal.Footer>
@@ -711,7 +721,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
 
       <Modal show={showModalEdit} onHide={() => setShowModalEdit(false)} 
         size="lg" centered >
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
+          <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
         <Modal.Header closeButton closeVariant="white">
           <Modal.Title>Edit Routine</Modal.Title>
         </Modal.Header>
@@ -722,7 +732,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
           />
           <br/>
-          <FormControl
+          <FormControl  style= {{color: theme.fontColor, backgroundColor: theme.background, borderColor: theme.borderColor}}
             placeholder="Enter routine description (optional)"
             value={newRoutine}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
@@ -730,7 +740,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
           <br/>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-light" onClick={handleSubmitEdit}>
+          <Button  style= {{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" onClick={handleSubmitEdit}>
             Finish
           </Button>
         </Modal.Footer>
@@ -739,15 +749,15 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
 
       <Modal show={showModalRep} onHide={() => setShowModalRep(false)} 
         size="lg" centered>
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
+          <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
         <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
-          <Modal.Title>Set Recurring Days</Modal.Title>
+          <Modal.Title  style= {{color: theme.fontColor, borderColor: theme.borderColor}} >Set Recurring Days</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <WeekRecurrence/>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-light" onClick={handleSubmitRep}>
+          <Button  style= {{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" onClick={handleSubmitRep}>
             Complete
           </Button>
         </Modal.Footer>
@@ -756,12 +766,12 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
 
       <Modal show={showModalTime} onHide={() => setShowModalTime(false)} 
         size="lg" centered>
-          <div style={{backgroundColor: '#2d1b69', color:'white', borderRadius: '5px'}}>
+          <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
         <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
-          <Modal.Title>Set Bedtime</Modal.Title>
+          <Modal.Title  style= {{color: theme.fontColor, borderColor: theme.borderColor}}>Set Bedtime</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <input value={bedTime} type="time" onChange={(e) => {onAddTime(selectedDate, e.target.value)}}> 
+        <Modal.Body >
+          <input  style= {{color: theme.fontColor, borderColor: theme.borderColor}} value={bedTime} type="time" onChange={(e) => {onAddTime(selectedDate, e.target.value)}}> 
           </input>
         </Modal.Body>
         <Modal.Footer>
