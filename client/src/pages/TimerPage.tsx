@@ -27,7 +27,7 @@ function TimerPage(): JSX.Element {
 
   let navigate = useNavigate();
   const routeChange = () => {
-    let path = `/home`;
+    let path = `/calendar`;
     navigate(path);
   };
 
