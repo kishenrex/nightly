@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import '../styles/checklist.css';
 import { Link } from 'react-router-dom';
 import { addDays } from 'date-fns';
@@ -49,11 +49,46 @@ type CalendarProps = {
   selectedDate: Date;
   timesByDate: TimeMap;
 };
+// Add these types at the top with other type definitions
+type Streaks = {
+  currentStreak: number;
+  maxStreak: number;
+};
 
 const ChecklistPage: React.FC = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
+  const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
+
+    // Add this useEffect to fetch streaks when component mounts
+    useEffect(() => {
+      const fetchStreaks = async () => {
+          try {
+              // Using the getUser endpoint instead
+              const response = await fetch('http://localhost:3001/users/testuser@example.com', {
+                  method: 'GET',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+              });
+  
+              if (!response.ok) {
+                  throw new Error('Failed to fetch streaks');
+              }
+  
+              const {data} = await response.json();
+              setStreaks({
+                  currentStreak: data.current_streak || 0,
+                  maxStreak: data.max_streak || 0
+              });
+          } catch (error) {
+              console.error('Error fetching streaks:', error);
+          }
+      };
+  
+      fetchStreaks();
+    }, []);
 
   const getDateKey = (date: Date): string => {
     return date ? date.toISOString().split('T')[0] : '';
@@ -136,10 +171,10 @@ const ChecklistPage: React.FC = (): JSX.Element => {
 
           <div className="text-white text-center border-start border-end px-3">
             <div className="d-flex align-items-center gap-2">
-              <i style={{color: theme.fontColor}}className="bi bi-fire"></i>
+              <i style={{color: theme.fontColor}} className="bi bi-fire"></i>
               <span style={{color: theme.fontColor}}>Current Streak</span>
             </div>
-            <Badge bg="success" className="fs-6">100</Badge>
+            <Badge bg="success" className="fs-6">{streaks.currentStreak}</Badge>
           </div>
 
           <div className="text-center border-start border-end px-3">
@@ -147,7 +182,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               <i className="bi bi-fire"></i>
               <span>Max Streak</span>
             </div>
-            <Badge bg="success" className="fs-6">100</Badge>
+            <Badge bg="success" className="fs-6">{streaks.maxStreak}</Badge>
           </div>
           
           <div className="d-flex align-items-center gap-5">
