@@ -38,5 +38,5 @@ export const fetchSleepLog = async (): Promise<SleepLog[]> => {
 	});
 
 	console.log("response in fetchExpenses", logList);
-	return logList;
+	return parseRoutine(logList);
 };
