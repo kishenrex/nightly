@@ -303,8 +303,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             <Modal.Body>
               <dl>
                 <dt>Calendar: </dt>
-                <dd>Click on a day to view and edit the night routine checklist for that day. Each cell also
-                  holds the expected/actual bedtime for the day.
+                <dd>Click on a day to view and edit the night routine checklist for that day. Click on the arrow keys
+                  to switch months. Each cell also holds the expected bedtime/actual sleep time for the day.
                 </dd>
                 <dt>Night Routine: </dt>
                 <dd>Each night routine has a main description that is required and then any extra details or notes the user 
