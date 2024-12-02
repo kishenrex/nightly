@@ -16,17 +16,17 @@ import ToggleThemeButton from '../components/ToggleThemeButton';
 import { ThemeContext } from '../context/ThemeContext';
 
 // Types
-type Routine = {
+export type Routine = {
   title: string;
   text: string;
   completed: boolean;
 };
 
-type RoutinesMap = {
+export type RoutinesMap = {
   [dateKey: string]: Routine[];
 };
 
-type TimeMap = {
+export type TimeMap = {
   [dateKey: string]: string;
 };
 
