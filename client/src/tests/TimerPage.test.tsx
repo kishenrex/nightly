@@ -66,7 +66,7 @@ test('when start timer is pressed', async () => {
     fireEvent.click(timerButton);
     
     expect(timerButton.innerHTML).toBe('Start Timer');
-    expect(intialTimer.innerHTML).toBe('00:00:00s');
+    expect(intialTimer.innerHTML).toBe('00:00:10s');
 })
 
 test('checks if the home button goes to homepage', () => {
@@ -89,7 +89,7 @@ test('checks if the modal works (checks user time)', () => {
     fireEvent.click(timerButton);
 
     const modalUserTitle = screen.getByText('Time Slept');
-    const modalUserTime = screen.getByText('You slept for 00 hours, 00 minutes, 05 seconds');
+    const modalUserTime = screen.getByText('You slept for 00 hours, 00 minutes, 15 seconds');
     expect(modalUserTitle).toBeInTheDocument();
     expect(modalUserTime).toBeInTheDocument();
 });
@@ -105,7 +105,7 @@ test('checks if the modal works (checks user time)', () => {
     fireEvent.click(timerButton);
 
     const modalUserTitle = screen.getByText('Time Slept');
-    const modalUserTime = screen.getByText('You slept for 00 hours, 00 minutes, 05 seconds');
+    const modalUserTime = screen.getByText('You slept for 00 hours, 00 minutes, 20 seconds');
     expect(modalUserTitle).toBeInTheDocument();
     expect(modalUserTime).toBeInTheDocument();
 });
@@ -129,7 +129,7 @@ test('checks if the modal works (checks edit user time)', () => {
 
     expect(hour).toHaveValue(0);
     expect(minute).toHaveValue(0);
-    expect(second).toHaveValue(5);
+    expect(second).toHaveValue(25);
 
     fireEvent.change(hour, { target: { value: 10 } });
     expect(hour).toHaveValue(10);
@@ -144,7 +144,7 @@ test('checks if the modal works (checks edit user time)', () => {
 
     fireEvent.change(second, { target: { value: 100 } });
     const errorSecond = screen.getByText('Warning: Over 59 seconds');
-    expect(second).toHaveValue(5);
+    expect(second).toHaveValue(25);
     expect(errorSecond).toBeInTheDocument();
 
     fireEvent.change(second, { target: { value: 10 } });

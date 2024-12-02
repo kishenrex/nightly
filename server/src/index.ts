@@ -2,15 +2,38 @@ import express from 'express';
 import cors from 'cors';
 import initDB from './initDB';
 import { createUserEndpoints } from './user/user-endpoints';
-import { createCalendarEndpoints } from './Calendar/calendar-endpoints';
+import { createCalendarEndpoints } from './calendar/calendar-endpoints';
 import { Database } from 'sqlite';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
+const cookieSession = require("cookie-session");
+const passportSetup = require("./passport");
+const passport = require("passport");
+const authRoute = require("./routes/auth");
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+app.use(
+  cookieSession({ name: "session", keys: ["nightly"], maxAge: 24 * 60 * 60 * 100 })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
+);
+
+app.use("/auth", authRoute);
 
 // Database and Server initialization
 async function startServer() {
@@ -45,7 +68,6 @@ async function startServer() {
         process.exit(1);
     }
 }
-
 // Start the server
 startServer().catch(console.error);
 
@@ -54,5 +76,3 @@ process.on('SIGTERM', () => {
     console.log('SIGTERM received. Shutting down gracefully...');
     process.exit(0);
 });
-
-export default app;

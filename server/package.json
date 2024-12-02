@@ -13,8 +13,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/passport": "^1.0.17",
+    "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "express": "^4.21.1",
+    "passport": "^0.5.3",
+    "passport-google-oauth20": "^2.0.0",
     "server": "file:",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
@@ -23,6 +27,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.3",
     "nodemon": "^3.1.7",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",

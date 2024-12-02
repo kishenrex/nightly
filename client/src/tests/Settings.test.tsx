@@ -1,11 +1,14 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import Settings from '../pages/Settings'; 
+import { MemoryRouter } from 'react-router-dom';
+import App from '../App';
 
 describe('Settings Is There', () => {
     test('shows the Settings page with all options', () => {
-        render(<Settings />);
+         render(<MemoryRouter initialEntries={['/settings']}>
+            <App />
+        </MemoryRouter>);
 
         expect(screen.getByText('Settings')).toBeInTheDocument();
         const desktopToggle = screen.getByLabelText(/Desktop Notification Preferences/i);
@@ -22,7 +25,9 @@ describe('Settings Is There', () => {
     });
 
     test('Desktop Notis Work', () => {
-        render(<Settings />);
+         render(<MemoryRouter initialEntries={['/settings']}>
+            <App />
+        </MemoryRouter>);
         
         const desktopToggle = screen.getByLabelText(/Desktop Notification Preferences/i);
         fireEvent.click(desktopToggle);

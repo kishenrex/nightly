@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Modal, Form, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import HomeButton from '../components/HomeButton';
+import { UserAvatar } from '../components/UserAvatar';
+import { ThemeContext } from '../context/ThemeContext';
+import { AvatarContext } from '../context/AvatarContext';
 
 type ProfileField = {
   label: string;
@@ -25,7 +29,7 @@ const DEFAULT_USER = {
   email: 'johnnyappleseed@nightly.com',
   username: 'JohnMachine222',
   password: 'mySecurePassword123',
-  avatar: null,
+  avatar: 'pokemon_starters.jpeg',
   streak: 0
 };
 
@@ -42,7 +46,8 @@ const ProfilePage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const {theme} = useContext(ThemeContext);
+  const {avatar} = useContext(AvatarContext);
   useEffect(() => {
     const initializeUser = async () => {
       try {
@@ -129,7 +134,6 @@ const ProfilePage: React.FC = () => {
       if (field.key === 'username') {
         setUser(prev => ({ ...prev, username: editValue }));
       }
-
       setShowModal(false);
     } catch (err) {
       console.error('Update error:', err);
@@ -214,11 +218,11 @@ const ProfilePage: React.FC = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      backgroundColor: '#553C9A', 
+      backgroundColor: theme.background, 
       padding: '2rem'
     }}>
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: theme.foreground,
         borderRadius: '20px',
         padding: '2rem',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
@@ -230,31 +234,15 @@ const ProfilePage: React.FC = () => {
           alignItems: 'center'
         }}>
           <h1 style={{ 
-            color: 'black', 
+            color: theme.fontColor, 
             fontSize: '2rem', 
             margin: 0 
           }}>
             Profile
           </h1>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <span>Streak: {user.streak} days</span>
-            <Link to="/calendar">
-              <Button 
-                variant="dark" 
-                style={{ 
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '48px',
-                  height: '48px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <i className="bi bi-house-fill" style={{ fontSize: '1.5rem' }}></i>
-              </Button>
-            </Link>
+            <span style={{color: theme.fontColor}}>Streak: {user.streak} days</span>
+            <HomeButton></HomeButton>
           </div>
         </div>
 
@@ -280,7 +268,7 @@ const ProfilePage: React.FC = () => {
             alignItems: 'center'
           }}>
             <h2 style={{ 
-              color: 'black',
+              color: theme.fontColor,
               marginBottom: '1rem',
               fontSize: '1.5rem'
             }}>
@@ -326,10 +314,7 @@ const ProfilePage: React.FC = () => {
                     justifyContent: 'center',
                     alignItems: 'center'
                   }}>
-                    <i className="bi bi-person-fill" style={{ 
-                      fontSize: '60px',
-                      color: '#A0A0A0'
-                    }}></i>
+                    <UserAvatar></UserAvatar>
                   </div>
                 </div>
               )}

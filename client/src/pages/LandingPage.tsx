@@ -1,17 +1,26 @@
 import '../styles/LandingPageStyles.css';
 import LoginButton from '../components/LoginButton';
-import React, { useState, useEffect } from 'react';
-import { googleLogout, useGoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
+import ToggleThemeButton from '../components/ToggleThemeButton';
 
 
 function LandingPage(): JSX.Element {
-  
+  const { theme } = useContext(ThemeContext);
 return (
-<div className='backgroundImage' role="img">
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'}}>
-    <h1 className='title'>Nightly</h1>
-  </div>
+<div style= {{
+    backgroundImage: `url("${require(`../styles/LandingPageImages/${theme.landingPageBackgroundImage}`)}")`, 
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    minHeight: '100vh',
+    }}className='backgroundImage' role="img" aria-label='backgroundImage'>
+
+  <div style={{ display: 'flex', alignItems: 'center',justifyContent: 'center', gap: '0.75rem', 
+  color: theme.fontColor, padding: '15px' }}>
+            <ToggleThemeButton></ToggleThemeButton>
+          <span style={{ fontSize: '5.5rem', fontWeight: '600' }}>Nightly</span>
+        </div>
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',}}>
     <LoginButton></LoginButton>
   </div>

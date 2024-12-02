@@ -1,4 +1,4 @@
-import { render, screen, fireEvent} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
 
@@ -8,11 +8,13 @@ test('checks if the background image gets rendered', async () => {
   render(<MemoryRouter>
     <App />
     </MemoryRouter>);
-  const backgroundImage = await screen.findByRole('img');
+  const backgroundImage = await waitFor(() => screen.findByRole('img'));
   fireEvent.load( backgroundImage );
 
   // Check if the image is rendered
-  expect(backgroundImage).toBeInTheDocument();
+  expect(backgroundImage.style.backgroundImage).toEqual(
+    `url(LightThemeLandingPage.jpg)`
+    );
 });
 
 test('checks if the title gets rendered', () => {

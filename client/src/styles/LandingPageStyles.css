@@ -1,5 +1,5 @@
 .backgroundImage {
-    background-Image: url("../styles/LightThemeLandingPage.jpg");
+    background-Image: url("../styles/LandingPageImages/LightThemeLandingPage.jpg");
     background-Size: cover;
     background-Repeat: no-repeat;
     background-position: center;
@@ -10,14 +10,3 @@
     font-Size: 90px;
     font-Family: Montserrat;
 }
-
-
-.loginButton {
-    color: white;
-    font-Family: Montserrat;
-    background-Color: #282c34;
-    font-Size: 50px;
-    border-Width: 20px;
-    border-Radius: 10px;
-    width: 250px;
-};

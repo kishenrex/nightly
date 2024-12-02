@@ -6,6 +6,7 @@ const DEFAULT_USER = {
     email: 'johnnyappleseed@nightly.com',
     username: 'JohnMachine222',
     password: 'mySecurePassword123',
+    avatar: 'pokemon_starters.jpeg',
     streak: 0
 };
 
@@ -49,7 +50,7 @@ export async function getUser(req: Request, res: Response, db: Database) {
                 data: {
                     email: DEFAULT_USER.email,
                     username: DEFAULT_USER.username,
-                    avatar: null,
+                    avatar: DEFAULT_USER.avatar,
                     streak: DEFAULT_USER.streak
                 }
             });
