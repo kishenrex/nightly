@@ -1,9 +1,10 @@
-import { SleepLog } from "../types";
+import { CalendarEntry, User } from "../types";
 import { parseRoutine } from "./parse";
-const port = 3001;
+import { Routine } from "../pages/CalendarPage";
+const port = process.env.PORT || 3001;
 
-export const createSleepLog = async (log: SleepLog): Promise<SleepLog> => {
-	const response = await fetch(`${port}/sleep-log`, {
+export const createSleepLog = async (log: CalendarEntry): Promise<CalendarEntry> => {
+	const response = await fetch(`${port}/calendar`, {
     	method: "POST",
     	headers: {
         	"Content-Type": "application/json",
@@ -17,7 +18,7 @@ export const createSleepLog = async (log: SleepLog): Promise<SleepLog> => {
 };
 
 export const deleteSleepLog = async (id: string): Promise<void> => {
-	const response = await fetch(`${port}/sleep-log`, {
+	const response = await fetch(`${port}/calendar`, {
     	method: "DELETE",
 	});
 	if (!response.ok) {
@@ -25,8 +26,8 @@ export const deleteSleepLog = async (id: string): Promise<void> => {
 	}
 };
 
-export const fetchSleepLog = async (): Promise<SleepLog[]> => {
-	const response = await fetch(`${port}/sleep-log`);
+export const fetchSleepLog = async (): Promise<Routine[]> => {
+	const response = await fetch(`${port}/calendar`);
 	if (!response.ok) {
     	throw new Error('Failed to fetch sleep logs');
 	}
@@ -38,5 +39,5 @@ export const fetchSleepLog = async (): Promise<SleepLog[]> => {
 	});
 
 	console.log("response in fetchExpenses", logList);
-	return parseRoutine(logList);
+	return parseRoutine(await logList);
 };

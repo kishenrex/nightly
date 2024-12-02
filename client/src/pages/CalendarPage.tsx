@@ -1,361 +1,804 @@
-import { useState, useEffect } from "react";
-import '../styles/checklist.css';
-import { Link } from 'react-router-dom';
-import { 
-  Button,
-  Badge,
-  Form,
-  Modal,
-  FormControl
-} from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import { createSleepLog, fetchSleepLog } from "../utils/sleep-log-utils";
-import { SleepLog } from "../types";
-
-// Types
-export type Routine = {
-  title: string;
-  text: string;
-  completed: boolean;
-};
-
-export type RoutinesMap = {
-  [dateKey: string]: Routine[];
-};
-
-export type TimeMap = {
-  [dateKey: string]: string;
-};
-
-type NightRoutineProps = {
-  selectedDate: Date | null;
-  routines: Routine[];
-  onAddRoutine: (routineText: string) => void;
-  onToggleRoutine: (index: number) => void;
-  onDeleteRoutine: (index: number) => void;
-};
-
-type CalendarProps = {
-  onSelectDate: (date: Date) => void;
-  selectedDate: Date | null;
-};
-
-const CalendarPage: React.FC = (): JSX.Element => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
-  const [timesByDate, setTimesByDate] = useState<TimeMap>({});
-
-  useEffect(() => {
-    loadSleepLog();
-  }, []);
+  // useEffect(() => {
+  //   loadSleepLog();
+  // }, []);
   
-  const loadSleepLog = async () => {
-  try {
-    const logList = await fetchSleepLog();
-    logList.forEach((log: SleepLog) => {
-      if (!routinesByDate[getDateKey(log.sleep_date)]) {
+  // const loadSleepLog = async () => {
+  // try {
+  //   const logList = await fetchSleepLog();
+  //   logList.forEach((log: SleepLog) => {
+  //     if (!routinesByDate[getDateKey(log.sleep_date)]) {
 
-        handleAddRoutine(log.sleep_date, log.);
-      }
-    });
-    } catch (err: any) {
-      console.log(err.message);
-    }
+  //       handleAddRoutine(log.sleep_date, log.);
+  //     }
+  //   });
+  //   } catch (err: any) {
+  //     console.log(err.message);
+  //   }
+  // };
+
+
+  import { useContext, useState } from "react";
+  import '../styles/checklist.css';
+  import { Link } from 'react-router-dom';
+  import { addDays } from 'date-fns';
+  import { 
+    Button,
+    Badge,
+    Form,
+    Modal,
+    FormControl,
+  } from 'react-bootstrap';
+  import 'bootstrap/dist/css/bootstrap.min.css';
+  import 'bootstrap-icons/font/bootstrap-icons.css';
+  import { UserAvatar } from '../components/UserAvatar';
+  import ToggleThemeButton from '../components/ToggleThemeButton';
+  import { ThemeContext } from '../context/ThemeContext';
+  
+  // Types
+  type Routine = {
+    title: string;
+    text: string;
+    completed: boolean;
   };
-
-
-  const getDateKey = (date: Date | null): string => {
-    return date ? date.toISOString().split('T')[0] : '';
+  
+  type RoutinesMap = {
+    [dateKey: string]: Routine[];
   };
-
-  const handleSelectDate = (date: Date): void => {
-    setSelectedDate(date);
+  
+  type TimeMap = {
+    [dateKey: string]: string;
   };
-
-  const handleAddRoutine = (routineText: string): void => {
-    const dateKey = getDateKey(selectedDate);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: false }]
-    }));
-    // HERE
+  
+  type NightRoutineProps = {
+    selectedDate: Date;
+    routines: Routine[];
+    routinesByDate: RoutinesMap;
+    bedTime: string;
+    timesByDate: TimeMap;
+    onAddTime: (newDate: Date, bedTime: string) => void;
+    onAddRoutine: (newDate: Date, routineTitle: string, routineText: string) => void;
+    onEditRoutine: (newDate: Date, routineTitle: string, routineText: string, index: number) => void;
+    onToggleRoutine: (index: number) => void;
+    onDeleteRoutine: (index: number) => void;
+    onDeleteAllRoutine: (date: Date) => void;
   };
-
-  const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number): void => {
-    const dateKey = getDateKey(date);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].map((routine, i) => 
-        i === index ? { title: routineTitle, text: routineText, completed: routine.completed } : routine
-      )
-    }));
+  
+  type CalendarProps = {
+    onSelectDate: (date: Date) => void;
+    selectedDate: Date;
+    timesByDate: TimeMap;
   };
-
-  const handleToggleRoutine = (index: number): void => {
-    const dateKey = getDateKey(selectedDate);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].map((routine, i) => 
-        i === index ? { ...routine, completed: !routine.completed } : routine
-      )
-    }));
-  };
-
-  const handleDeleteRoutine = (index: number): void => {
-    const dateKey = getDateKey(selectedDate);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].filter((_, i) => i !== index)
-    }));
-  };
-
-  return (
-    <div style={{ height: '100vh', backgroundColor: '#2d1b69', display: 'flex', flexDirection: 'column' }}>
-      {/* Simplified Header */}
-      <div style={{ backgroundColor: '#1a103f', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white' }}>
-          <i className="bi bi-moon-stars" style={{ fontSize: '2rem' }}></i>
-          <span style={{ fontSize: '2rem', fontWeight: '600' }}>Nightly</span>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link to="/timer" className="text-decoration-none">
-            <Button variant="outline-light" className="d-flex align-items-center gap-2">
-              <i className="bi bi-clock fs-5"></i>
-              <span>Sleep Timer</span>
-            </Button>
-          </Link>
-
-          <div className="text-white text-center border-start border-end px-3">
-            <div className="d-flex align-items-center gap-2">
-              <i className="bi bi-fire"></i>
-              <span>Current Streak</span>
-            </div>
-            <Badge bg="success" className="fs-6">100</Badge>
+  
+  const ChecklistPage: React.FC = (): JSX.Element => {
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
+    const [timesByDate, setTimesByDate] = useState<TimeMap>({});
+  
+    const getDateKey = (date: Date): string => {
+      return date ? date.toISOString().split('T')[0] : '';
+    };
+  
+    const handleSelectDate = (date: Date): void => {
+      setSelectedDate(date);
+    };
+  
+    const handleAddTime = (date: Date, bedTime: string): void => {
+      const dateKey = getDateKey(date);
+      setTimesByDate(prev => ({
+        ...prev,
+        [dateKey]: bedTime
+      }));
+    };
+  
+    const handleAddRoutine = (date: Date, routineTitle: string, routineText: string): void => {
+      const dateKey = getDateKey(date);
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: false }]
+      }));
+    };
+  
+    const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number): void => {
+      const dateKey = getDateKey(date);
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: prev[dateKey].map((routine, i) => 
+          i === index ? { title: routineTitle, text: routineText, completed: routine.completed } : routine
+        )
+      }));
+    };
+  
+    const handleToggleRoutine = (index: number): void => {
+      const dateKey = getDateKey(selectedDate);
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: prev[dateKey].map((routine, i) => 
+          i === index ? { ...routine, completed: !routine.completed } : routine
+        )
+      }));
+    };
+  
+    const handleDeleteRoutine = (index: number): void => {
+      const dateKey = getDateKey(selectedDate);
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: prev[dateKey].filter((_, i) => i !== index)
+      }));
+    };
+  
+    const deleteAllRoutine = (date: Date): void => {
+      const dateKey = getDateKey(date);
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: []
+      }));
+    };
+  
+    const { theme }  = useContext(ThemeContext);
+  
+    return (
+      <div style={{ height: '100vh', backgroundColor: theme.background, display: 'flex', flexDirection: 'column' }}>
+        {/* Simplified Header */}
+        <div style={{ backgroundColor: theme.navbar, padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
+             { theme.boolean ? <i style={{ fontSize: '2rem'}} className="bi bi-sun"></i> : <i style={{ fontSize: '2rem'}} className="bi bi-moon-stars"></i>}
+            <span style={{ fontSize: '2rem', fontWeight: '600' }}>Nightly</span>
           </div>
           
-          <div className="d-flex align-items-center gap-3">
-            <Link to="/profile" className="text-white">
-              <i className="bi bi-person-circle" style={{ fontSize: '3.5rem' }}></i>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+            <Link to="/timer" className="text-decoration-none">
+              <Button  style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2">
+                <i className="bi bi-clock fs-5"></i>
+                <span>Sleep Stopwatch</span>
+              </Button>
             </Link>
-            <Button variant="outline-light" className="ms-2">
-              <i className="bi bi-moon-stars"></i>
-            </Button>
-          </div>
-
-          <Link to="/settings" className="text-decoration-none">
-            <Button variant="outline-light" className="d-flex align-items-center gap-2">
-              <i className="bi bi-gear fs-5"></i>
-              Settings
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ flex: '1 1 auto', padding: '1.5rem', minHeight: '0' }}>
-        <div style={{ display: 'flex', gap: '1.5rem', height: '100%'}}>
-          {/* Calendar Panel */}
-          <div style={{ flex: '1 1 auto', width: '80%', backgroundColor: 'white', borderRadius: '0.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-            <h2 className="mb-4">
-              <i className="bi bi-calendar3 me-2"></i>
-              Calendar
-            </h2>
-            <Calendar 
-              onSelectDate={handleSelectDate}
-              selectedDate={selectedDate}
-            />
-          </div>
-
-          {/* Routine Panel */}
-          <div style={{ 
-            width: '500px', 
-            backgroundColor: '#1a103f', 
-            borderRadius: '0.5rem', 
-            padding: '1.5rem',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            <h2 className="text-white mb-4">
-              <i className="bi bi-moon-stars me-2"></i>
-              Night Routine for the Day
-            </h2>
-            <NightRoutine 
-              selectedDate={selectedDate}
-              routines={routinesByDate[getDateKey(selectedDate)] || []}
-              onAddRoutine={handleAddRoutine}
-              onToggleRoutine={handleToggleRoutine}
-              onDeleteRoutine={handleDeleteRoutine}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate }): JSX.Element => {
-  const today = new Date();
-  const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
-  const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-  const firstDayWeekday = firstDayOfMonth.getDay();
-  const daysInMonth = lastDayOfMonth.getDate();
-
-  const calendarDays = Array(35).fill(null).map((_, index) => {
-    const dayNumber = index - firstDayWeekday + 1;
-    return dayNumber > 0 && dayNumber <= daysInMonth ? dayNumber : null;
-  });
-
-  const needsSixWeeks = calendarDays.filter(day => day !== null).length + firstDayWeekday > 35;
-  if (needsSixWeeks) {
-    calendarDays.push(...Array(7).fill(null));
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: '1', minHeight: '0' }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="m-0">
-          {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
-        </h3>
-        <div>
-          <Button variant="outline-primary" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
-            <i className="bi bi-chevron-left"></i>
-          </Button>
-          <Button variant="outline-primary" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
-            <i className="bi bi-chevron-right"></i>
-          </Button>
-        </div>
-      </div>
-
-      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', minHeight: '0' }}>
-        <table className="table table-bordered m-0" style={{ flex: '1', tableLayout: 'fixed' }}>
-          <thead>
-            <tr>
-              {days.map(day => (
-                <th key={day} className="text-center py-2">{day}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody style={{ height: '100%' }}>
-            {Array.from({ length: needsSixWeeks ? 6 : 5 }).map((_, weekIndex) => (
-              <tr key={weekIndex} style={{ height: `${100 / (needsSixWeeks ? 6 : 5)}%` }}>
-                {Array.from({ length: 7 }).map((_, dayIndex) => {
-                  const dayNumber = calendarDays[weekIndex * 7 + dayIndex];
-                  return (
-                    <td 
-                      key={dayIndex} 
-                      onClick={() => dayNumber && onSelectDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber))} // ADD CREATE HERE MAYBE
-                      style={{ 
-                        cursor: dayNumber ? 'pointer' : 'default',
-                        backgroundColor: selectedDate?.getDate() === dayNumber && 
-                                       selectedDate?.getMonth() === currentDate.getMonth() &&
-                                       selectedDate?.getFullYear() === currentDate.getFullYear()
-                                       ? '#e6f3ff' 
-                                       : dayNumber ? 'white' : '#f8f9fa',
-                        padding: '0'
-                      }}
-                    >
-                      <div className="d-flex align-items-center justify-content-center h-100">
-                        <span style={{ fontSize: '1.1rem' }}>{dayNumber || ''}</span>
-                      </div>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-const NightRoutine: React.FC<NightRoutineProps> = ({ 
-  selectedDate, 
-  routines, 
-  onAddRoutine, 
-  onToggleRoutine, 
-  onDeleteRoutine 
-}): JSX.Element => {
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [newRoutine, setNewRoutine] = useState<string>('');
-
-  const handleSubmit = (): void => {
-    if (newRoutine.trim()) {
-      onAddRoutine(newRoutine.trim());
-      setNewRoutine('');
-      setShowModal(false);
-    }
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      <div style={{ flex: '1', overflowY: 'auto', marginBottom: '1rem' }}>
-        {selectedDate ? (
-          <Form>
-            {routines.map((routine, index) => (
-              <div key={index} className="d-flex align-items-center justify-content-between mb-3">
-                <Form.Check 
-                  type="checkbox"
-                  id={`routine-${index}`}
-                  label={routine.text}
-                  checked={routine.completed}
-                  onChange={() => onToggleRoutine(index)}
-                  className="text-white flex-grow-1"
-                  style={{ fontSize: '1.1rem', paddingRight: '1rem' }}
-                />
-                <Button 
-                  variant="outline-danger" 
-                  size="sm"
-                  onClick={() => onDeleteRoutine(index)}
-                  style={{ padding: '0.5rem 0.75rem' }}
-                >
-                  <i className="bi bi-trash"></i>
-                </Button>
+  
+            <div className="text-white text-center border-start border-end px-3">
+              <div className="d-flex align-items-center gap-2">
+                <i style={{color: theme.fontColor}}className="bi bi-fire"></i>
+                <span style={{color: theme.fontColor}}>Current Streak</span>
               </div>
-            ))}
-          </Form>
-        ) : (
-          <p className="text-white">Select a day to see routines</p>
-        )}
+              <Badge bg="success" className="fs-6">100</Badge>
+            </div>
+  
+            <div className="text-center border-start border-end px-3">
+              <div style={{color:theme.fontColor}} className="d-flex align-items-center gap-2">
+                <i className="bi bi-fire"></i>
+                <span>Max Streak</span>
+              </div>
+              <Badge bg="success" className="fs-6">100</Badge>
+            </div>
+            
+            <div className="d-flex align-items-center gap-5">
+              <Link to="/profile" className="text-white">
+                <UserAvatar/>
+              </Link>
+              <div style={{paddingRight: '20px'}}>
+                  <ToggleThemeButton></ToggleThemeButton>
+              </div>
+  
+            </div>
+  
+        
+          </div>
+        </div>
+  
+        {/* Main Content */}
+        <div style={{ flex: '1 1 auto', padding: '1.5rem', minHeight: '0' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', height: '100%'}}>
+            {/* Calendar Panel */}
+            <div style={{ flex: '1 1 auto', width: '80%',
+             borderRadius: '0.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column'}}>
+              <h2 style={{color: theme.fontColor}}className="mb-4">
+                <i className="bi bi-calendar3 me-2"></i>
+                Calendar
+              </h2>
+              <Calendar 
+                onSelectDate={handleSelectDate}
+                selectedDate={selectedDate}
+                timesByDate={timesByDate}
+              />
+            </div>
+  
+            {/* Routine Panel */}
+            <div style={{ 
+              width: '550px', 
+              borderRadius: '0.5rem', 
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: theme.foreground
+            }}>
+              <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
+                 { theme.boolean ? <i style={{ fontSize: '2rem'}} className="bi bi-sun"></i> : <i style={{ fontSize: '2rem'}} className="bi bi-moon-stars"></i>}
+                  Night Routine for {selectedDate?.toDateString()}
+              </h4>
+              <NightRoutine 
+                selectedDate={selectedDate}
+                routines={routinesByDate[getDateKey(selectedDate)] || []}
+                routinesByDate={routinesByDate}
+                bedTime = {timesByDate[getDateKey(selectedDate)] || "00:00"}
+                timesByDate={timesByDate}
+                onAddRoutine={handleAddRoutine}
+                onEditRoutine={handleEditRoutine}
+                onToggleRoutine={handleToggleRoutine}
+                onDeleteRoutine={handleDeleteRoutine}
+                onDeleteAllRoutine={deleteAllRoutine}
+                onAddTime={handleAddTime}
+              />
+            </div>
+          </div>
+        </div>
       </div>
-
-      <Button 
-        variant="outline-light" 
-        className="w-100" 
-        onClick={() => setShowModal(true)}
-        size="lg"
-      >
-        <i className="bi bi-plus-lg me-2"></i>
-        Add New Routine
-      </Button>
-
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Routine</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <FormControl
-            placeholder="Enter new routine"
-            value={newRoutine}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            Add Routine
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
-  );
-};
+    );
+  };
+  
+  const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate }): JSX.Element => {
+    const today = new Date();
+    const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
+    const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const firstDayWeekday = firstDayOfMonth.getDay();
+    const daysInMonth = lastDayOfMonth.getDate();
+  
+    const getDateKey = (date: Date): string => {
+      return date ? date.toISOString().split('T')[0] : '';
+    };
+  
+    const convertTime = (time: string) => {
+      if (!time) {
+        return;
+      }
+      const [hours, minutes] = time.split(':').map(Number);
+      let period = 'am';
+  
+      let newHours = hours;
+      if (hours >= 12) {
+        period = 'pm';
+        if (hours > 12) newHours = hours - 12;
+      } else if (hours === 0) {
+        newHours = 12;
+      }
+  
+      return `${newHours}:${minutes.toString().padStart(2, '0')}${period}`;
+    };
+  
+    const calendarDays = Array(35).fill(null).map((_, index) => {
+      const dayNumber = index - firstDayWeekday + 1;
+      return dayNumber > 0 && dayNumber <= daysInMonth ? dayNumber : null;
+    });
+  
+    const needsSixWeeks = calendarDays.filter(day => day !== null).length + firstDayWeekday > 35;
+    if (needsSixWeeks) {
+      calendarDays.push(...Array(7).fill(null));
+    }
+  
+    const {theme} = useContext(ThemeContext);
+  
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: '1', minHeight: '0'}}>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h3 style={{color: theme.fontColor}}className="m-0">
+            {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
+          </h3>
+          <div>
+            <Button variant="outline-light" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+              <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
+            </Button>
+            <Button variant="outline-light" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+              <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
+            </Button>
+          </div>
+        </div>
+  
+        <div style={{ flex: '1', display: 'flex', flexDirection: 'column', minHeight: '0', background: theme.calendarBackground}}>
+          <table className="table table-bordered m-0" style={{ flex: '1', tableLayout: 'fixed' }}>
+            <thead>
+              <tr>
+                {days.map(day => (
+                  <th key={day} className="text-center py-2">{day}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody style={{ height: '100%' }}>
+              {Array.from({ length: needsSixWeeks ? 6 : 5 }).map((_, weekIndex) => (
+                <tr key={weekIndex} style={{ height: `${100 / (needsSixWeeks ? 6 : 5)}%` }}>
+                  {Array.from({ length: 7 }).map((_, dayIndex) => {
+                    const dayNumber = calendarDays[weekIndex * 7 + dayIndex];
+                    return (
+                      <td 
+                        key={dayIndex} 
+                        onClick={() => dayNumber && onSelectDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber))}
+                        style={{ 
+                          cursor: dayNumber ? 'pointer' : 'default',
+                          backgroundColor: selectedDate?.getDate() === dayNumber && 
+                                         selectedDate?.getMonth() === currentDate.getMonth() &&
+                                         selectedDate?.getFullYear() === currentDate.getFullYear()
+                                         ? '#e6f3ff' 
+                                         : dayNumber ? 'white' : '#f8f9fa',
+                          padding: '0'
+                        }}
+                      >
+                        <div className="d-flex align-items-center justify-content-center h-100">
+                          <span style={{ fontSize: '1.1rem' }}>{dayNumber || ''} <br/> 
+                          {dayNumber && convertTime(timesByDate[getDateKey(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber || 0))])} </span>
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+  
+  const NightRoutine: React.FC<NightRoutineProps> = ({ 
+    selectedDate, 
+    routines, 
+    routinesByDate,
+    bedTime,
+    timesByDate,
+    onAddTime,
+    onAddRoutine, 
+    onEditRoutine,
+    onToggleRoutine, 
+    onDeleteRoutine,
+    onDeleteAllRoutine
+  }): JSX.Element => {
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [showModalRep, setShowModalRep] = useState<boolean>(false);
+    const [showModalTime, setShowModalTime] = useState<boolean>(false);
+    const [showModalEdit, setShowModalEdit] = useState<boolean>(false);
+    const [bedTimeText, setBedTimeText] = useState({
+      text: 'Bedtime',
+      icon: 'bi bi-cloud-moon'});
+  
+    const [newTitle, setNewTitle] = useState<string>('');
+    const [newRoutine, setNewRoutine] = useState<string>('');
+    const [newRepeat, setNewRepeat] = useState<string[]>([]);
+    const [currIndex, setCurrIndex] = useState<number>(0);
+    const [numRepeat, setNumRepeat] = useState<number>(1);
+  
+    const isActiveKeys = {
+      'Sun': false,
+      'Mon': false,
+      'Tue': false,
+      'Wed': false,
+      'Thu': false,
+      'Fri': false,
+      'Sat': false,
+    };
+    const [isActive, setIsActive] = useState<typeof isActiveKeys>(isActiveKeys);
+  
+    const convertTime = (time: string) => {
+      if (!time) {
+        return "";
+      }
+      const [hours, minutes] = time.split(':').map(Number);
+      let period = 'am';
+  
+      let newHours = hours;
+      if (hours >= 12) {
+        period = 'pm';
+        if (hours > 12) newHours = hours - 12;
+      } else if (hours === 0) {
+        newHours = 12;
+      }
+  
+      return `${newHours}:${minutes.toString().padStart(2, '0')}${period}`;
+    };
+  
+    const openAddRoutine = (): void => {
+      setNewTitle('');
+      setNewRoutine('');
+      setShowModal(true);
+    }
+  
+    const repeatAddRoutine = (date: Date) => {
+      const dateKey = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
+      onDeleteAllRoutine(date);
+      routinesByDate[dateKey]?.forEach(rout => {
+        onAddRoutine(date, rout.title, rout.text);
+      });
+      onAddTime(date, timesByDate[dateKey]);
+    }
+  
+    const handleSubmit = (): void => {
+      if (newTitle.trim()) {
+        onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim());
+        setShowModal(false);
+      }
+    };
+  
+    const handleSubmitEdit = (): void => {
+      if (newTitle.trim()) {
+        onEditRoutine(selectedDate, newTitle.trim(), newRoutine.trim(), currIndex);
+        setShowModalEdit(false);
+      }
+    };
+  
+    const handleSubmitRep = (): void => {
+      if (newRepeat.length > 0) {
+        const day = selectedDate?.getDay();
+        let populate = numRepeat;
+        let updated = null;
+        newRepeat.forEach(element => {
+          populate =numRepeat;
+          updated = selectedDate;
+          switch(element) {
+            case "Sun":
+              updated = addDays(selectedDate, 0-day);
+              if (day !== 0) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+  
+              break;
+            case "Mon":
+              updated = addDays(selectedDate, 1-day);
+              if (day !== 1) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+              break;
+            case "Tue":
+              updated = addDays(selectedDate, 2-day);
+              if (day !== 2) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+              break;
+            case "Wed":
+              updated = addDays(selectedDate, 3-day);
+              if (day !== 3) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+              break;
+            case "Thu":
+              updated = addDays(selectedDate, 4-day);
+              if (day !== 4) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+              break;
+            case "Fri":
+              updated = addDays(selectedDate, 5-day);
+              if (day !== 5) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+              break;
+            case "Sat":
+              updated = addDays(selectedDate, 6-day);
+              if (day !== 6) {
+                repeatAddRoutine(updated);
+              }
+              updated = addDays(updated, 7);
+              
+              while (populate > 0) {
+                repeatAddRoutine(updated);
+                populate -= 1;
+                updated = addDays(updated, 7);
+              }
+              break;
+            default:
+              break;
+          }
+        });
+      }
+  
+      setNumRepeat(1);
+      setNewRepeat([]);
+      setIsActive((prevState) => ({...prevState, ["Sun"]: false}));
+      setIsActive((prevState) => ({...prevState, ["Mon"]: false}));
+      setIsActive((prevState) => ({...prevState, ["Tue"]: false}));
+      setIsActive((prevState) => ({...prevState, ["Wed"]: false}));
+      setIsActive((prevState) => ({...prevState, ["Thu"]: false}));
+      setIsActive((prevState) => ({...prevState, ["Fri"]: false}));
+      setIsActive((prevState) => ({...prevState, ["Sat"]: false}));
+      setShowModalRep(false);
+    };
+  
+    const handleMouseEnter = () => {
+      setBedTimeText({
+        text: convertTime(bedTime), 
+        icon: 'bi bi-cloud-moon', 
+      });
+    };
+  
+    // Revert content when mouse leaves
+    const handleMouseLeave = () => {
+      setBedTimeText({
+        text: 'Bedtime',  
+        icon: 'bi bi-cloud-moon', 
+      });
+    };
+  
+    const handleDayClick = (day: string) => {
+      if (newRepeat.includes(day)) {
+          const filtered = newRepeat.filter(aDay => aDay !== day);
+          setNewRepeat([...filtered]);
+          setIsActive((prevState) => ({...prevState, [day]: false}));
+      }
+      else {
+          setNewRepeat([...newRepeat, day])
+          setIsActive((prevState) => ({...prevState, [day]: true}));
+      }
+    }
+  
+    const handleWeekInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = parseInt(e.target.value);
+      if (value > 52) {
+        setNumRepeat(52);
+      } 
+      else if (value < 1) {
+        setNumRepeat(1);
+      }
+      else {
+        setNumRepeat(value);
+      }
+    }
+  
+    const WeekRecurrence = () => {
+      return (
+      <div >
+          <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor }}>Repeat on: </h4>
+          <div style={{ display: 'inline-flex', marginBottom: "20px",  color: theme.fontColor }}>
+              <DayButton day={"Sun"} />
+              <DayButton day={"Mon"} />
+              <DayButton day={"Tue"} />
+              <DayButton day={"Wed"} />
+              <DayButton day={"Thu"} />
+              <DayButton day={"Fri"} />
+              <DayButton day={"Sat"} />
+          </div>
+          <br/>
+          <div style={{ display: 'inline-flex' }}>
+              <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem',  color: theme.fontColor  }}>For</h4>
+              <input type="number" min="1" max="52" style={{backgroundColor: "transparent",  color: theme.fontColor , 
+                  borderColor: "white", borderRadius: "5px", width: "30%", marginRight: "15px"}}
+                  onBlur={handleWeekInput}></input>
+              <h4 style={{ fontSize: '1.1rem', paddingRight: '1rem',  color: theme.fontColor  }}>Week(s)</h4>
+          </div>
+      </div>
+      );
+    };
+  
+      const DayButton = (props: { day: keyof typeof isActiveKeys}) => {
+          return (
+              <Button className={`${isActive[props.day] ? 'active' : ''}`} variant="outline-light" data-bs-toggle="button"
+                  style={{ margin: '2px 4px', padding: '6px 12px', borderColor: theme.borderColor, color: theme.fontColor }}
+                  onClick={() => handleDayClick(props.day)}
+              > {props.day} </Button> 
+          );
+      };
+      
+   const { theme }  = useContext(ThemeContext);
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, maxHeight:"90%" }}>
+        <div style={{ flex: '1', overflowY: 'auto', marginBottom: '1rem' }}>
+          {selectedDate ? (
+            <Form>
+              {routines.map((routine, index) => (
+                <div key={index} className="d-flex align-items-center justify-content-between mb-3">
+                  <div style={{ width: "90%", maxWidth: "90%", wordBreak: "break-word", 
+                      overflowWrap: "break-word", borderStyle: "solid", 
+                      borderRadius: "5px", borderColor: theme.borderColor, borderWidth: "1px", padding: "8px"}}>
+                      <Form.Check 
+                      type="checkbox"
+                      id={`routine-${index}`}
+                      label={routine.title}
+                      checked={routine.completed}
+                      onChange={() => onToggleRoutine(index)}
+                      style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor }}
+                      />
+                      <p style={{ fontSize: '1.1rem', paddingRight: '1rem', color: theme.fontColor, margin: "0px" }}> {routine.text} </p>
+                  </div>
+                  <div>
+                  <Button 
+                    size="sm"
+                    onClick={(e) => {
+                      setShowModalEdit(true);
+                      setNewTitle(routine.title);
+                      setNewRoutine(routine.text);
+                      setCurrIndex(index);
+                    }}
+                    style={{ padding: '0.2rem 0.4rem', margin: "4px", color: theme.fontColor,  borderColor: theme.borderColor }}
+                    variant="outline-light" 
+                  >
+                    <i className="bi bi-pencil-square"></i>
+                  </Button>
+                  <Button 
+                    size="sm"
+                    onClick={() => onDeleteRoutine(index)}
+                    style={{ padding: '0.2rem 0.4rem', margin: "4px", display: "block" , color: theme.fontColor, borderColor: theme.borderColor}}
+                    variant="outline-light" 
+                  >
+                    <i className="bi bi-dash-lg"></i>
+                  </Button>
+                  </div>
+                </div>
+              ))}
+            </Form>
+          ) : (
+            <p style={{color: theme.fontColor}} className="text-white" >Select a day to see routines</p>
+          )}
+        </div>
+  
+          <div style={{display: "flex"}}>
+        <Button 
+        style={{color: theme.fontColor, width: "33%", borderColor: theme.borderColor, borderRadius: '5px'}}
+          variant="outline-light" 
+          onClick={openAddRoutine}
+          size="lg"
+        >
+          <i className="bi bi-plus-lg me-2"></i>
+          <br/>
+          Routine
+        </Button>
+  
+        <Button 
+          variant="outline-light" 
+          onClick={() => setShowModalTime(true)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          size="lg"
+          style={{width: "33%", borderColor: theme.borderColor, borderRadius: '5px'}}
+        >
+          <i style={{color: theme.fontColor}} className={`bi ${bedTimeText.icon}`}></i><br/>
+           <span style={{color: theme.fontColor}}>
+          {bedTimeText.text}
+          </span>
+        </Button>
+  
+        <Button 
+          variant="outline-light" 
+          onClick={() => setShowModalRep(true)}
+          size="lg"
+          style={{width: "33%", borderColor: theme.borderColor, borderRadius: '5px'}}
+   
+        >
+          <i  style={{color: theme.fontColor}}
+          className="bi bi-arrow-counterclockwise"></i>
+          <br/>
+         <span style={{color: theme.fontColor}}>
+          Repeat
+          </span> 
+        </Button>
+        </div>
+  
+        <Modal show={showModal} onHide={() => setShowModal(false)} 
+          size="lg" centered >
+            <div style={{backgroundColor: theme.navbar, color:theme.fontColor, borderRadius: '5px'}}>
+          <Modal.Header closeButton closeVariant="white">
+            <Modal.Title>Add New Routine</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <FormControl
+              placeholder="Enter new routine"
+              value={newTitle}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
+            />
+            <br/>
+            <FormControl
+              placeholder="Enter routine description (optional)"
+              value={newRoutine}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
+            />
+            <br/>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button style= {{color: theme.fontColor, borderColor: theme.borderColor}}
+             variant="outline-light" onClick={handleSubmit}>
+              Add Routine
+            </Button>
+          </Modal.Footer>
+          </div>
+        </Modal>
+  
+        <Modal show={showModalEdit} onHide={() => setShowModalEdit(false)} 
+          size="lg" centered >
+            <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
+          <Modal.Header closeButton closeVariant="white">
+            <Modal.Title>Edit Routine</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <FormControl
+              placeholder="Enter routine"
+              value={newTitle}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
+            />
+            <br/>
+            <FormControl  style= {{color: theme.fontColor, backgroundColor: theme.background, borderColor: theme.borderColor}}
+              placeholder="Enter routine description (optional)"
+              value={newRoutine}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
+            />
+            <br/>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button  style= {{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" onClick={handleSubmitEdit}>
+              Finish
+            </Button>
+          </Modal.Footer>
+          </div>
+        </Modal>
+  
+        <Modal show={showModalRep} onHide={() => setShowModalRep(false)} 
+          size="lg" centered>
+            <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
+          <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
+            <Modal.Title  style= {{color: theme.fontColor, borderColor: theme.borderColor}} >Set Recurring Days</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <WeekRecurrence/>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button  style= {{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" onClick={handleSubmitRep}>
+              Complete
+            </Button>
+          </Modal.Footer>
+          </div>
+        </Modal>
+  
+        <Modal show={showModalTime} onHide={() => setShowModalTime(false)} 
+          size="lg" centered>
+            <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
+          <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
+            <Modal.Title  style= {{color: theme.fontColor, borderColor: theme.borderColor}}>Set Bedtime</Modal.Title>
+          </Modal.Header>
+          <Modal.Body >
+            <input  style= {{color: theme.fontColor, borderColor: theme.borderColor}} value={bedTime} type="time" onChange={(e) => {onAddTime(selectedDate, e.target.value)}}> 
+            </input>
+          </Modal.Body>
+          <Modal.Footer>
+          </Modal.Footer>
+          </div>
+        </Modal>
+      </div>
+    );
+  };
 
 export default CalendarPage;
