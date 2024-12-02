@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import Settings from './Settings'; 
+import Settings from '../pages/Settings'; 
 
 describe('Settings Is There', () => {
     test('shows the Settings page with all options', () => {

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test Page</title>
+</head>
+<body>
+    <h2>Test API Endpoints</h2>
+    
+    <div>
+        <h3>Create User</h3>
+        <button onclick="createUser()">Create Test User</button>
+    </div>
+
+    <div>
+        <h3>Create Calendar Entry</h3>
+        <button onclick="createCalendarEntry()">Create Calendar Entry</button>
+    </div>
+
+    <div>
+        <h3>Get User Data</h3>
+        <button onclick="getUser()">Get User</button>
+        <pre id="userData"></pre>
+    </div>
+
+    <div>
+        <h3>Get Calendar Data</h3>
+        <button onclick="getCalendar()">Get Calendar</button>
+        <pre id="calendarData"></pre>
+    </div>
+
+    <script>
+        const TEST_EMAIL = 'sleepuser@test.com';
+
+        async function createUser() {
+            const response = await fetch('http://localhost:3001/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: TEST_EMAIL,
+                    username: "sleepmaster",
+                    password: "test123",
+                    avatar: "https://example.com/avatar.jpg"
+                })
+            });
+            const data = await response.json();
+            document.getElementById('userData').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function createCalendarEntry() {
+            const response = await fetch('http://localhost:3001/calendar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: "sleep123",
+                    email: TEST_EMAIL,
+                    calendar_day: "2024-03-11",
+                    time_start: "22:30",
+                    time_end: "08:30",
+                    time_slept: "10:00",
+                    checklist: '["(O)brush your teeth", "(O)read book", "(O)meditation"]',
+                    desired_bedtime: "22:00",
+                    desired_reminder_time: "21:30"
+                })
+            });
+            const data = await response.json();
+            document.getElementById('calendarData').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function getUser() {
+            const response = await fetch(`http://localhost:3001/users/${TEST_EMAIL}`);
+            const data = await response.json();
+            document.getElementById('userData').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function getCalendar() {
+            const response = await fetch(`http://localhost:3001/calendar?email=${TEST_EMAIL}`);
+            const data = await response.json();
+            document.getElementById('calendarData').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
