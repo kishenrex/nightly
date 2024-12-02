@@ -14,7 +14,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { UserAvatar } from '../components/UserAvatar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { ThemeContext } from '../context/ThemeContext';
-import { fetchSleepLog } from "../utils/sleep-log-utils";
+import { fetchCalendar, fetchRoutine } from "../utils/routine-utils";
+import { CalendarEntry } from "../types";
+import { parseRoutine } from "../utils/parse";
 
 // Types
 export type Routine = {
@@ -38,7 +40,7 @@ type NightRoutineProps = {
   bedTime: string;
   timesByDate: TimeMap;
   onAddTime: (newDate: Date, bedTime: string) => void;
-  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string) => void;
+  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string, completed: boolean) => void;
   onEditRoutine: (newDate: Date, routineTitle: string, routineText: string, index: number) => void;
   onToggleRoutine: (index: number) => void;
   onDeleteRoutine: (index: number) => void;
@@ -49,6 +51,7 @@ type CalendarProps = {
   onSelectDate: (date: Date) => void;
   selectedDate: Date;
   timesByDate: TimeMap;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<number>>;
 };
 // Add these types at the top with other type definitions
 type Streaks = {
@@ -61,8 +64,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
   const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
+  const [email, setEmail] = useState<string>("");
+  const [month, setMonth] = useState<number>(0);
+  const port = process.env.PORT || 3001;
 
-    // Add this useEffect to fetch streaks when component mounts
+    // Add this useEffect to fetch streaks and email when component mounts
     useEffect(() => {
       const fetchStreaks = async () => {
           try {
@@ -83,6 +89,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
                   currentStreak: data.current_streak || 0,
                   maxStreak: data.max_streak || 0
               });
+              setEmail(data.email)
           } catch (error) {
               console.error('Error fetching streaks:', error);
           }
@@ -90,13 +97,31 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   
       const loadCalendar = async () => {
       try {
-        const logList = await fetchSleepLog();
-        logList.forEach((log: SleepLog) => {
-          if (!routinesByDate[getDateKey(log.sleep_date)]) {
+        const response = await fetch(`${port}/calendar/${email}`, {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+        });
 
-            handleAddRoutine(log.sleep_date, log.);
+        if (!response.ok) {
+          throw new Error('Failed to fetch calendar');
+        }
+
+        const {data} = await response.json();
+        let rout = null;
+        data.array.forEach((d: CalendarEntry) => {
+          if (parseInt(d.calendar_day.split("-")[1]) === month) {
+            rout = parseRoutine(d.checklist);
+            rout.forEach((r: Routine) => {
+              if (!routinesByDate[d.calendar_day]) {
+                handleAddRoutine(new Date(d.calendar_day), r.title, r.text, r.completed);
+              }
+            });
           }
         });
+
+        
         } catch (err: any) {
           console.log(err.message);
         }
@@ -104,7 +129,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   
       fetchStreaks();
       loadCalendar();
-    }, []);
+    }, [month]);
 
   const getDateKey = (date: Date): string => {
     return date ? date.toISOString().split('T')[0] : '';
@@ -122,7 +147,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string): void => {
+  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string, completed: boolean): void => {
     const dateKey = getDateKey(date);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -229,6 +254,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               onSelectDate={handleSelectDate}
               selectedDate={selectedDate}
               timesByDate={timesByDate}
+              setCurrentMonth={setMonth}
             />
           </div>
 
@@ -243,7 +269,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           }}>
             <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
                { theme.boolean ? <i style={{ fontSize: '2rem'}} className="bi bi-sun"></i> : <i style={{ fontSize: '2rem'}} className="bi bi-moon-stars"></i>}
-                Night Routine for {selectedDate?.toDateString()}
+                Night Routine Checklist for {selectedDate?.toDateString()}
             </h4>
             <NightRoutine 
               selectedDate={selectedDate}
@@ -265,7 +291,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate }): JSX.Element => {
+const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate, setCurrentMonth }): JSX.Element => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
   const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -316,10 +342,10 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
           {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
         </h3>
         <div>
-          <Button variant="outline-light" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+          <Button variant="outline-light" className="me-2" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); setCurrentMonth(currentDate.getMonth() - 1); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
           </Button>
-          <Button variant="outline-light" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)); setCurrentMonth(currentDate.getMonth() + 1); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
           </Button>
         </div>
@@ -435,14 +461,14 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
     const dateKey = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
     onDeleteAllRoutine(date);
     routinesByDate[dateKey]?.forEach(rout => {
-      onAddRoutine(date, rout.title, rout.text);
+      onAddRoutine(date, rout.title, rout.text, rout.completed);
     });
     onAddTime(date, timesByDate[dateKey]);
   }
 
   const handleSubmit = (): void => {
     if (newTitle.trim()) {
-      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim());
+      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim(), false);
       setShowModal(false);
     }
   };
