@@ -14,6 +14,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { UserAvatar } from '../components/UserAvatar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { ThemeContext } from '../context/ThemeContext';
+import { fetchSleepLog } from "../utils/sleep-log-utils";
 
 // Types
 export type Routine = {
@@ -87,7 +88,22 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           }
       };
   
+      const loadCalendar = async () => {
+      try {
+        const logList = await fetchSleepLog();
+        logList.forEach((log: SleepLog) => {
+          if (!routinesByDate[getDateKey(log.sleep_date)]) {
+
+            handleAddRoutine(log.sleep_date, log.);
+          }
+        });
+        } catch (err: any) {
+          console.log(err.message);
+        }
+      };
+  
       fetchStreaks();
+      loadCalendar();
     }, []);
 
   const getDateKey = (date: Date): string => {
