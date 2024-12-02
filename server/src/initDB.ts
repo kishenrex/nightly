@@ -20,9 +20,8 @@ const initDB = async () => {
                 username TEXT NOT NULL,
                 password TEXT NOT NULL,
                 avatar TEXT,
-                streak INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                current_streak INTEGER DEFAULT 0,
+                max_streak INTEGER DEFAULT 0
             );
         `);
 
@@ -47,10 +46,10 @@ const initDB = async () => {
 
         // Insert test data into `users` table
         await db.run(`
-            INSERT OR IGNORE INTO users (email, username, password, avatar, streak)
+            INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak)
             VALUES 
-                ('testuser@example.com', 'Test User', 'password123', 'default.png', 3),
-                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 5);
+                ('testuser@example.com', 'Test User', 'password123', 'default.png', 4, 8),
+                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 2, 5);
         `);
 
         // Insert test data into `calendar_entries` table
