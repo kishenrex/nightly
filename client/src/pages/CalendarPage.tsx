@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import '../styles/checklist.css';
 import { Link } from 'react-router-dom';
 import { addDays } from 'date-fns';
@@ -11,19 +11,21 @@ import {
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { createSleepLog, fetchSleepLog } from "../utils/sleep-log-utils";
+import { SleepLog } from "../types";
 
 // Types
-type Routine = {
+export type Routine = {
   title: string;
   text: string;
   completed: boolean;
 };
 
-type RoutinesMap = {
+export type RoutinesMap = {
   [dateKey: string]: Routine[];
 };
 
-type TimeMap = {
+export type TimeMap = {
   [dateKey: string]: string;
 };
 
@@ -52,6 +54,25 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
 
+  useEffect(() => {
+    loadSleepLog();
+  }, []);
+  
+  const loadSleepLog = async () => {
+  try {
+    const logList = await fetchSleepLog();
+    logList.forEach((log: SleepLog) => {
+      if (!routinesByDate[getDateKey(log.sleep_date)]) {
+
+        handleAddRoutine(log.sleep_date, log.);
+      }
+    });
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  };
+
+
   const getDateKey = (date: Date): string => {
     return date ? date.toISOString().split('T')[0] : '';
   };
@@ -74,6 +95,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       ...prev,
       [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: false }]
     }));
+    // HERE
   };
 
   const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number): void => {
@@ -287,7 +309,7 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
                   return (
                     <td 
                       key={dayIndex} 
-                      onClick={() => dayNumber && onSelectDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber))}
+                      onClick={() => dayNumber && onSelectDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber))} // ADD CREATE HERE MAYBE
                       style={{ 
                         cursor: dayNumber ? 'pointer' : 'default',
                         backgroundColor: selectedDate?.getDate() === dayNumber && 
