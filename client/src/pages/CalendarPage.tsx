@@ -66,6 +66,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
   const [email, setEmail] = useState<string>("");
   const [month, setMonth] = useState<number>(0);
+  const [showModal, setShowModal] = useState<boolean>(false);
   const port = process.env.PORT || 3001;
 
     // Add this useEffect to fetch streaks and email when component mounts
@@ -236,7 +237,13 @@ const ChecklistPage: React.FC = (): JSX.Element => {
 
           </div>
 
-      
+          <div className="d-flex align-items-center gap-5" style={{paddingRight: '40px'}}>
+          <Button  style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2"
+              onClick={() => setShowModal(true)}>
+              <i className="bi bi-question-circle fs-5"></i>
+              <span>Help</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -285,6 +292,54 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               onAddTime={handleAddTime}
             />
           </div>
+
+          {/*Instructions*/}
+          <Modal show={showModal} onHide={() => setShowModal(false)} 
+            size="lg" centered >
+              <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
+            <Modal.Header closeButton closeVariant="white">
+              <Modal.Title>Help</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <dl>
+                <dt>Calendar: </dt>
+                <dd>Click on a day to view and edit the night routine checklist for that day. Each cell also
+                  holds the expected/actual bedtime for the day.
+                </dd>
+                <dt>Night Routine: </dt>
+                <dd>Each night routine has a main description that is required and then any extra details or notes the user 
+                  would want to add that is optional. The night routines can be anything the user would want/need to do before they sleep.
+                </dd>
+                <dt>Bedtime: </dt>
+                <dd>The user can set an expected/desired bedtime for each day. Once the day passes, it is replaced by the actual
+                  elapsed sleep time they record each night. For example, before the current day it might be 10:00 pm for the expected 
+                  bedtime, and then after the current day, it could show 8:32:05 (8 hours, 32 minutes, and 5 seconds) for the actual elapsed sleep time. 
+                </dd>
+                <dt>Repeat: </dt>
+                <dd>The user can set recurrences for each night routine by choosing the days of the week to repeat, along
+                  with the number of weeks to repeat it for. This will completely replace any previously set routines on those days with the new ones.
+                </dd>
+                <dt>Night Routines Window: </dt>
+                <dd>The window on the right allow the user to view and edit all of their night routines for a day. 
+                  When they complete a night routine, that is also where they check the item off the checklist. If the user checks all of the
+                  night routines off, they will continue their streak.
+                </dd>
+                <dt>Sleep Stopwatch: </dt>
+                <dd>The stopwatch is used to keep track of how much sleep the user gets every night. Right before the
+                  user sleeps, they should start the stopwatch. When they wake up, they should immediately end the stopwatch. After ending
+                  the stopwatch, they can keep the lapsed time for the bedtime, or they can edit the time if it is inaccurate.
+                </dd>
+                <dt>Streaks: </dt>
+                <dd>The streak is used to keep the user on task with completing all of their tasks each day. Both the current 
+                  streak and the max streak is displayed for the user to keep track. </dd>
+                <dt>Toggle Theme: </dt>
+                <dd>The user can toggle between the day and night theme at their own convenience. </dd>
+              </dl>
+            </Modal.Body>
+            <Modal.Footer>
+            </Modal.Footer>
+            </div>
+          </Modal>
         </div>
       </div>
     </div>
@@ -775,13 +830,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         </Modal.Header>
         <Modal.Body>
           <FormControl
-            placeholder="Enter new routine"
+            placeholder="Enter new routine  e.g. Brush teeth"
             value={newTitle}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
           />
           <br/>
           <FormControl
-            placeholder="Enter routine description (optional)"
+            placeholder="Enter routine description (OPTIONAL) e.g. Make sure to switch out old toothbrush"
             value={newRoutine}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
           />
@@ -804,13 +859,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         </Modal.Header>
         <Modal.Body>
           <FormControl
-            placeholder="Enter routine"
+            placeholder="Enter new routine  e.g. Brush teeth"
             value={newTitle}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
           />
           <br/>
           <FormControl  style= {{color: theme.fontColor, backgroundColor: theme.background, borderColor: theme.borderColor}}
-            placeholder="Enter routine description (optional)"
+            placeholder="Enter routine description (OPTIONAL) e.g. Make sure to switch out old toothbrush"
             value={newRoutine}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
           />
