@@ -13,6 +13,61 @@ const initDB = async () => {
         // Enable foreign key constraints
         await db.exec('PRAGMA foreign_keys = ON;');
 
+        // Check if the `users` table exists
+        const tableExists = await db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='users';");
+
+        if (tableExists) {
+            console.log("Recreating the `users` table to include the `theme` column...");
+
+            // Rename the existing table
+            await db.exec(`
+                ALTER TABLE users RENAME TO users_old;
+            `);
+
+            // Create the new `users` table with the `theme` column
+            await db.exec(`
+                CREATE TABLE users (
+                    email TEXT PRIMARY KEY,
+                    username TEXT NOT NULL,
+                    password TEXT NOT NULL,
+                    avatar TEXT,
+                    streak INTEGER DEFAULT 0,
+                    theme TEXT DEFAULT 'light',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+
+            // Copy data from the old table to the new table, setting `theme` to its default value
+            await db.exec(`
+                INSERT INTO users (email, username, password, avatar, streak, created_at, updated_at)
+                SELECT email, username, password, avatar, streak, created_at, updated_at
+                FROM users_old;
+            `);
+
+            // Drop the old table
+            await db.exec(`
+                DROP TABLE users_old;
+            `);
+
+            console.log("Successfully recreated the `users` table with the `theme` column.");
+        } else {
+            console.log("Creating the `users` table for the first time...");
+
+            // Create the `users` table
+            await db.exec(`
+                CREATE TABLE IF NOT EXISTS users (
+                    email TEXT PRIMARY KEY,
+                    username TEXT NOT NULL,
+                    password TEXT NOT NULL,
+                    avatar TEXT,
+                    streak INTEGER DEFAULT 0,
+                    theme TEXT DEFAULT 'light',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+        }
         // Create users table
         await db.exec(`
             CREATE TABLE IF NOT EXISTS users (
@@ -25,6 +80,7 @@ const initDB = async () => {
             );
         `);
 
+        // Create the `calendar_entries` table
         await db.exec(`
             CREATE TABLE IF NOT EXISTS calendar_entries (
                 id TEXT,
@@ -33,10 +89,12 @@ const initDB = async () => {
                 time_start TEXT,
                 time_slept TEXT,
                 checklist TEXT,
+                desired_bedtime TEXT,
+                desired_reminder_time TEXT,
+                FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
                 bedtime TEXT
             );
         `);
-        
 
         // Check existing tables for debugging
         const tables = await db.all("SELECT name FROM sqlite_master WHERE type='table';");
@@ -44,8 +102,11 @@ const initDB = async () => {
 
         // Insert test data into `users` table
         await db.run(`
+            INSERT OR IGNORE INTO users (email, username, password, avatar, streak, theme)
             INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak)
             VALUES 
+                ('testuser@example.com', 'Test User', 'password123', 'default.png', 3, 'dark'),
+                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 5, 'light');
                 ('testuser@example.com', 'Test User', 'password123', 'default.png', 4, 8),
                 ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 2, 5);
         `);

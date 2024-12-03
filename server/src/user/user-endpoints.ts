@@ -1,6 +1,5 @@
-// user-endpoints.ts
 import { Database } from "sqlite";
-import { createUser, getUser, updateUser, updateStreak } from "./user-utils";
+import { createUser, getUser, updateUser, updateStreak, updateTheme } from "./user-utils";
 import { Request, Response } from 'express';
 
 export function createUserEndpoints(app: any, db: Database) {
@@ -18,5 +17,9 @@ export function createUserEndpoints(app: any, db: Database) {
 
     app.patch("/users/:email/streak", (req: Request, res: Response) => {
         updateStreak(req, res, db);
+    });
+
+    app.patch("/users/:email/theme", (req: Request, res: Response) => {
+        updateTheme(req, res, db);
     });
 }
