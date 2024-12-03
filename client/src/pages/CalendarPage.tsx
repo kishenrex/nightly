@@ -61,7 +61,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
   const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
 
-    // Add this useEffect to fetch streaks when component mounts
+    // useEffect sends a fetch request to get the current and max streaks of the user
     useEffect(() => {
       const fetchStreaks = async () => {
           try {
