@@ -5,6 +5,7 @@ export interface User {
     calendar_table: string;
     avatar: string;
     streak: number;
+    theme: string;
 }
 
 export interface CalendarEntry {
