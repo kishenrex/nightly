@@ -37,14 +37,14 @@ export async function getUser(req: Request, res: Response, db: Database) {
         console.log('Fetching user with email:', email);
         
         const user = await db.get(
-            'SELECT email, username, avatar, streak FROM users WHERE email = ?', 
+            'SELECT email, username, avatar, current_streak, max_streak theme FROM users WHERE email = ?',
             [email]
         );
         
         if (!user && email === DEFAULT_USER.email) {
             await db.run(
-                'INSERT INTO users (email, username, password, streak) VALUES (?, ?, ?, ?)',
-                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password, DEFAULT_USER.streak]
+                'INSERT INTO users (email, username, password, current_streak, max_streak, theme) VALUES (?, ?, ?, ?, ?, ?)',
+                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password, DEFAULT_USER.currentStreak, DEFAULT_USER.maxStreak]
             );
             
             return res.status(200).send({ 
@@ -52,7 +52,9 @@ export async function getUser(req: Request, res: Response, db: Database) {
                     email: DEFAULT_USER.email,
                     username: DEFAULT_USER.username,
                     avatar: DEFAULT_USER.avatar,
-                    streak: DEFAULT_USER.streak
+                    current_streak: DEFAULT_USER.currentStreak,
+                    max_streak: DEFAULT_USER.maxStreak,
+                    theme: DEFAULT_USER.theme
                 }
             });
         }

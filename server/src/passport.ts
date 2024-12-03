@@ -2,11 +2,10 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
 import initDB from './initDB';
 import { Database } from "sqlite";
+require('dotenv').config();
 
-// import { createUser, getUser } from "./user/user-utils";
-
-
-
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 passport.use(
   new GoogleStrategy(
