@@ -115,10 +115,9 @@ const ChecklistPage: React.FC = (): JSX.Element => {
         let rout = null;
         data.calendar.forEach((d: CalendarEntry) => {
           if (parseInt(d.calendar_day.split("-")[1]) === month) {
-            console.log("month:", month);
             rout = parseRoutine(d.checklist);
             rout.forEach((r: Routine) => {
-              if (!routinesByDate[d.calendar_day] || routinesByDate[d.calendar_day].length === 0) {
+              if (!routinesByDate[d.calendar_day] && r.title != undefined) {
                 handleAddRoutine(new Date(d.calendar_day), r.title, r.text, r.completed);
               }
             });
@@ -149,8 +148,9 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               bedtime: "00:00",
             });
           }
-          // console.log("routines:",routinesByDate[dateKey]);
-          editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          if (routinesByDate[dateKey] != undefined) {
+            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
         } catch (error) {
           console.error('Error fetching calendar:', error);
         }
