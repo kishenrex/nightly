@@ -3,7 +3,7 @@ import '../styles/TimerPageStyles.css';
 import { useNavigate } from "react-router-dom";
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-
+// home button leads to calendar page
 function HomeButton(): JSX.Element {
   let navigate = useNavigate(); 
   const routeChange = () =>{ 

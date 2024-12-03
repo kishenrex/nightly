@@ -42,8 +42,9 @@ export async function getUser(req: Request, res: Response, db: Database) {
         if (!user && email === DEFAULT_USER.email) {
             // If the default user doesn't exist, create it
             await db.run(
-                'INSERT INTO users (email, username, password, streak) VALUES (?, ?, ?, ?)',
-                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password, DEFAULT_USER.streak]
+                'INSERT INTO users (email, username, password, avatar, streak) VALUES (?, ?, ?, ?, ?)',
+                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password,DEFAULT_USER.avatar,
+                     DEFAULT_USER.streak]
             );
             
             return res.status(200).send({ 
@@ -120,5 +121,23 @@ export async function updateStreak(req: Request, res: Response, db: Database) {
         return res.status(200).send({ message: "Streak updated successfully" });
     } catch (error) {
         return res.status(400).send({ error: `Failed to update streak: ${error}` });
+    }
+}
+
+//updates the user's avatar
+export async function updateAvatar(req: Request, res: Response, db: Database) {
+    try {
+        const { email } = req.params;
+        const { avatar } = req.body;
+
+        const result = await db.run('UPDATE users SET avatar = ? WHERE email = ?', [avatar, email]);
+        
+        if (result.changes === 0) {
+            return res.status(404).send({ error: "User not found" });
+        }
+
+        return res.status(200).send({ message: "Avatar updated successfully" });
+    } catch (error) {
+        return res.status(400).send({ error: `Failed to update avatar: ${error}` });
     }
 }
