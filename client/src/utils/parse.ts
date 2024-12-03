@@ -5,10 +5,17 @@ export const parseRoutine = (input: string): Routine[] => {
     const routine = input.split(";").map(r => {
         const [completed, title, text] = r.split("|");
         return { 
-            title: title.trim(), 
-            text: text.trim(), 
-            completed: completed.trim() === "1"
+            title: title, 
+            text: text, 
+            completed: completed === "1"
         };
     });
     return routine;
+};
+
+export const stringifyRoutine = (input: Routine[]): string => {
+    console.log("routines: ", input);
+    return input.map(({ title, text, completed }) => 
+            `${completed ? "1" : "0"}|${title}|${text}`
+    ).join(";");
 };

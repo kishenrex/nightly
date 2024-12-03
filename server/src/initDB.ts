@@ -27,13 +27,13 @@ const initDB = async () => {
 
         await db.exec(`
             CREATE TABLE IF NOT EXISTS calendar_entries (
-                id TEXT PRIMARY KEY,
+                id TEXT,
                 email TEXT NOT NULL,
                 calendar_day TEXT NOT NULL,
                 time_start TEXT,
                 time_slept TEXT,
                 checklist TEXT,
-                bedtime TEXT,
+                bedtime TEXT
             );
         `);
         
@@ -54,8 +54,8 @@ const initDB = async () => {
         await db.run(`
             INSERT OR IGNORE INTO calendar_entries (id, email, calendar_day, time_start, time_slept, checklist, bedtime)
             VALUES 
-                ('1', 'testuser@example.com', '2024-11-20', '22:00', '06:00', '8', '{"task1": "done", "task2": "pending"}', '22:00', '21:30'),
-                ('2', 'exampleuser@example.com', '2024-11-21', '23:00', '07:00', '8', '{"task1": "completed", "task2": "pending"}', '23:00', '22:30');
+                ('1', 'testuser@example.com', '2024-11-20', '22:00', '06:00', '0|Title|Descript;1|Title2|Descript2', '21:30'),
+                ('2', 'exampleuser@example.com', '2024-11-21', '23:00', '07:00', '0|Title|Descript;1|Title2|Descript2', '22:30');
         `);
 
         console.log('Test data added to database.'); // Debug log

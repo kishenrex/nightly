@@ -14,9 +14,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { UserAvatar } from '../components/UserAvatar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { ThemeContext } from '../context/ThemeContext';
-import { fetchCalendar, fetchRoutine } from "../utils/routine-utils";
+import { createCalendarEntry, editRoutine, fetchCalendar } from "../utils/routine-utils";
 import { CalendarEntry } from "../types";
-import { parseRoutine } from "../utils/parse";
+import { parseRoutine, stringifyRoutine } from "../utils/parse";
 
 // Types
 export type Routine = {
@@ -51,6 +51,7 @@ type CalendarProps = {
   onSelectDate: (date: Date) => void;
   selectedDate: Date;
   timesByDate: TimeMap;
+  currentMonth: number;
   setCurrentMonth: React.Dispatch<React.SetStateAction<number>>;
 };
 // Add these types at the top with other type definitions
@@ -64,8 +65,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
   const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
-  const [email, setEmail] = useState<string>("");
-  const [month, setMonth] = useState<number>(0);
+  const [email, setEmail] = useState<string>("testuser@example.com");
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [showModal, setShowModal] = useState<boolean>(false);
   const port = process.env.PORT || 3001;
 
@@ -98,7 +99,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   
       const loadCalendar = async () => {
       try {
-        const response = await fetch(`${port}/calendar/${email}`, {
+        console.log("email:", email)
+        const response = await fetch(`http://localhost:3001/calendar/testuser@example.com`, {
           method: "GET",
           headers: {
               "Content-Type": "application/json",
@@ -109,35 +111,77 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           throw new Error('Failed to fetch calendar');
         }
 
-        const {data} = await response.json();
+        const data = await response.json();
         let rout = null;
-        data.array.forEach((d: CalendarEntry) => {
+        data.calendar.forEach((d: CalendarEntry) => {
           if (parseInt(d.calendar_day.split("-")[1]) === month) {
+            console.log("month:", month);
             rout = parseRoutine(d.checklist);
             rout.forEach((r: Routine) => {
-              if (!routinesByDate[d.calendar_day]) {
+              if (!routinesByDate[d.calendar_day] || routinesByDate[d.calendar_day].length === 0) {
                 handleAddRoutine(new Date(d.calendar_day), r.title, r.text, r.completed);
               }
             });
           }
         });
-
-        
-        } catch (err: any) {
-          console.log(err.message);
-        }
+        } catch (error) {
+          console.error('Error fetching calendar:', error);
+      }
       };
   
       fetchStreaks();
       loadCalendar();
     }, [month]);
 
+    useEffect(() => {
+      const modifyCalendar = async () => {
+        try {
+          const dateKey = getDateKey(selectedDate)
+          const entry = await fetchCalendar(email, dateKey);
+          if (entry.email === "") {
+            createCalendarEntry(email, {
+              id: "",
+              email: email,
+              calendar_day: dateKey,
+              time_start: "",
+              time_slept: "",
+              checklist: "",
+              bedtime: "00:00",
+            });
+          }
+          // console.log("routines:",routinesByDate[dateKey]);
+          editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+        } catch (error) {
+          console.error('Error fetching calendar:', error);
+        }
+      }
+
+      modifyCalendar();
+    }, [routinesByDate]);
+
   const getDateKey = (date: Date): string => {
     return date ? date.toISOString().split('T')[0] : '';
   };
 
-  const handleSelectDate = (date: Date): void => {
+  const handleSelectDate = async (date: Date): Promise<void> => {
     setSelectedDate(date);
+    try {
+      const entry = await fetchCalendar(email, getDateKey(date));
+      if (entry.email === "") {
+        createCalendarEntry(email, {
+          id: "",
+          email: email,
+          calendar_day: getDateKey(date),
+          time_start: "",
+          time_slept: "",
+          checklist: "",
+          bedtime: "00:00",
+        });
+      }
+    }
+    catch (error) {
+      console.error('Error clicking date:', error);
+    }
   };
 
   const handleAddTime = (date: Date, bedTime: string): void => {
@@ -148,7 +192,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string, completed: boolean): void => {
+  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string, completed: boolean) => {
     const dateKey = getDateKey(date);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -156,7 +200,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number): void => {
+  const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number) => {
     const dateKey = getDateKey(date);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -166,7 +210,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleToggleRoutine = (index: number): void => {
+  const handleToggleRoutine = (index: number) => {
     const dateKey = getDateKey(selectedDate);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -176,7 +220,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleDeleteRoutine = (index: number): void => {
+  const handleDeleteRoutine = (index: number) => {
     const dateKey = getDateKey(selectedDate);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -261,6 +305,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               onSelectDate={handleSelectDate}
               selectedDate={selectedDate}
               timesByDate={timesByDate}
+              currentMonth={month}
               setCurrentMonth={setMonth}
             />
           </div>
@@ -346,7 +391,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate, setCurrentMonth }): JSX.Element => {
+const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate, currentMonth, setCurrentMonth }): JSX.Element => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
   const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -397,10 +442,10 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
           {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
         </h3>
         <div>
-          <Button variant="outline-light" className="me-2" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); setCurrentMonth(currentDate.getMonth() - 1); } }>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); setCurrentMonth(currentMonth - 1); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
           </Button>
-          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)); setCurrentMonth(currentDate.getMonth() + 1); } }>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)); setCurrentMonth(currentMonth + 1); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
           </Button>
         </div>

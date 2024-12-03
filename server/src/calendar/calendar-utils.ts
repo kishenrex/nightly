@@ -5,8 +5,9 @@ import { Database } from "sqlite";
 export async function createCalendarEntry(req: Request, res: Response, db: Database) {
     try {
         const entry = req.body as CalendarEntry;
+        console.log("entry:", entry);
         
-        if (!entry.email || !entry.calendar_day) {
+        if (!entry.calendar_day) {
             return res.status(400).send({ error: "Missing required fields" });
         }
 
@@ -19,55 +20,34 @@ export async function createCalendarEntry(req: Request, res: Response, db: Datab
              entry.time_slept, entry.checklist, entry.bedtime]
         );
 
-        res.status(201).send({ data: entry });
+        res.status(201).send({ calendar: entry });
     } catch (error) {
         return res.status(400).send({ error: `Calendar entry could not be created: ${error}` });
     }
 }
 
-export async function getCalendarEntries(req: Request, res: Response, db: Database) {
-    try {
-        const { email, startDate, endDate } = req.query;
-        
-        let query = 'SELECT * FROM calendar_entries WHERE email = ?';
-        const params: any[] = [email];
-
-        if (startDate && endDate) {
-            query += ' AND calendar_day BETWEEN ? AND ?';
-            params.push(startDate as string, endDate as string);
-        }
-
-        const entries = await db.all(query, params);
-        return res.status(200).send({ data: entries });
-    } catch (error) {
-        return res.status(400).send({ error: `Failed to fetch calendar entries: ${error}` });
-    }
-}
-
-
 export async function updateCalendarEntry(req: Request, res: Response, db: Database) {
     try {
-        const { id } = req.params;
-        const updates = req.body;
+        const { date, newList }= req.body;
 
-        const entry = await db.get('SELECT * FROM calendar_entries WHERE id = ?', [id]);
+        const entry = await db.get('SELECT * FROM calendar_entries WHERE calendar_day = ?', [date]);
         
         if (!entry) {
             return res.status(404).send({ error: "Calendar entry not found" });
         }
 
-        const fields = Object.keys(updates)
-            .filter(key => key !== 'id' && key !== 'email')
-            .map(key => `${key} = ?`)
-            .join(', ');
+        // const fields = Object.keys(updates)
+        //     .filter(key => key !== 'id' && key !== 'email')
+        //     .map(key => `${key} = ?`)
+        //     .join(', ');
 
-        const values = Object.entries(updates)
-            .filter(([key]) => key !== 'id' && key !== 'email')
-            .map(([_, value]) => value);
+        // const value = Object.entries(updates)
+        //     .filter(([key]) => key !== 'id' && key !== 'email')
+        //     .map(([_, value]) => value);
 
         await db.run(
-            `UPDATE calendar_entries SET ${fields} WHERE id = ?`,
-            [...values, id]
+            `UPDATE calendar_entries SET checklist = ? WHERE calendar_day = ?`,
+            [newList, date]
         );
 
         return res.status(200).send({ message: "Calendar entry updated successfully" });
@@ -75,3 +55,60 @@ export async function updateCalendarEntry(req: Request, res: Response, db: Datab
         return res.status(400).send({ error: `Failed to update calendar entry: ${error}` });
     }
 }
+
+export async function getCalendarEntries(req: Request, res: Response, db: Database) {
+    try {
+        const email = req.params.email as string;
+
+        const rows = await db.all(`SELECT * FROM calendar_entries WHERE email = ?`,
+            [email]
+        );
+
+        console.log('Fetched rows:', rows); // Log fetched rows for debugging
+        console.log('Current email:', email); // Log fetched rows for debugging
+        res.status(200).send({ calendar: rows });
+
+      } catch (err) {
+        console.error('Database fetch error:', err); // Log any database errors
+        res.status(500).send({ error: 'Database fetch error' });
+      }
+}
+
+// Currently unused
+export async function deleteCalendarEntry(req: Request, res: Response, db: Database) {
+    try {
+        const date = req.body as string;
+        
+        if (!date) {
+            return res.status(400).send({ error: "Missing date" });
+        }
+
+        await db.run(`
+            DELETE FROM calender_entries WHERE calendar_day = ?`,
+            [date]
+        );
+    } catch (error) {
+        return res.status(400).send({ error: `Calendar entry could not be created` });
+    }
+}
+
+// Currently unused
+// export async function getCalendarEntries(req: Request, res: Response, db: Database) {
+//     try {
+//         const { email, startDate, endDate } = req.query;
+        
+//         let query = 'SELECT * FROM calendar_entries WHERE email = ?';
+//         const params: any[] = [email];
+
+//         if (startDate && endDate) {
+//             query += ' AND calendar_day BETWEEN ? AND ?';
+//             params.push(startDate as string, endDate as string);
+//         }
+
+//         const entries = await db.all(query, params);
+//         return res.status(200).send({ data: entries });
+//     } catch (error) {
+//         return res.status(400).send({ error: `Failed to fetch calendar entries: ${error}` });
+//     }
+// }
+
