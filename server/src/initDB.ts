@@ -31,7 +31,8 @@ const initDB = async () => {
                     username TEXT NOT NULL,
                     password TEXT NOT NULL,
                     avatar TEXT,
-                    streak INTEGER DEFAULT 0,
+                    current_streak INTEGER DEFAULT 0,
+                    max_streak INTEGER DEFAULT 0
                     theme TEXT DEFAULT 'light',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -61,24 +62,14 @@ const initDB = async () => {
                     username TEXT NOT NULL,
                     password TEXT NOT NULL,
                     avatar TEXT,
-                    streak INTEGER DEFAULT 0,
+                    current_streak INTEGER DEFAULT 0,
+                    max_streak INTEGER DEFAULT 0,
                     theme TEXT DEFAULT 'light',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
             `);
         }
-        // Create users table
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS users (
-                email TEXT PRIMARY KEY,
-                username TEXT NOT NULL,
-                password TEXT NOT NULL,
-                avatar TEXT,
-                current_streak INTEGER DEFAULT 0,
-                max_streak INTEGER DEFAULT 0
-            );
-        `);
 
         // Create the `calendar_entries` table
         await db.exec(`
@@ -89,10 +80,8 @@ const initDB = async () => {
                 time_start TEXT,
                 time_slept TEXT,
                 checklist TEXT,
-                desired_bedtime TEXT,
-                desired_reminder_time TEXT,
+                bedtime TEXT,
                 FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
-                bedtime TEXT
             );
         `);
 
@@ -102,13 +91,10 @@ const initDB = async () => {
 
         // Insert test data into `users` table
         await db.run(`
-            INSERT OR IGNORE INTO users (email, username, password, avatar, streak, theme)
-            INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak)
+            INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak, theme)
             VALUES 
-                ('testuser@example.com', 'Test User', 'password123', 'default.png', 3, 'dark'),
-                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 5, 'light');
-                ('testuser@example.com', 'Test User', 'password123', 'default.png', 4, 8),
-                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 2, 5);
+                ('testuser@example.com', 'Test User', 'password123', 'default.png', 4, 8, 'dark'),
+                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 2, 5, 'light');
         `);
 
         // Insert test data into `calendar_entries` table

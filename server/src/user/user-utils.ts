@@ -8,7 +8,7 @@ const DEFAULT_USER = {
     password: 'mySecurePassword123',
     avatar: 'pokemon_starters.jpeg',
     streak: 0,
-    theme: 'light' // Default theme
+    theme: 'light', // Default theme
     currentStreak: 0,
     maxStreak: 0
 };
@@ -38,15 +38,12 @@ export async function getUser(req: Request, res: Response, db: Database) {
         console.log('Fetching user with email:', email);
         
         const user = await db.get(
-            'SELECT email, username, avatar, streak, theme FROM users WHERE email = ?', 
             'SELECT email, username, avatar, current_streak, max_streak FROM users WHERE email = ?',
             [email]
         );
         
         if (!user && email === DEFAULT_USER.email) {
             await db.run(
-                'INSERT INTO users (email, username, password, streak, theme) VALUES (?, ?, ?, ?, ?)',
-                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password, DEFAULT_USER.streak, DEFAULT_USER.theme]
                 'INSERT INTO users (email, username, password, current_streak, max_streak) VALUES (?, ?, ?, ?, ?)',
                 [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password, DEFAULT_USER.currentStreak, DEFAULT_USER.maxStreak]
             );
@@ -57,7 +54,7 @@ export async function getUser(req: Request, res: Response, db: Database) {
                     username: DEFAULT_USER.username,
                     avatar: DEFAULT_USER.avatar,
                     streak: DEFAULT_USER.streak,
-                    theme: DEFAULT_USER.theme
+                    theme: DEFAULT_USER.theme,
                     current_streak: DEFAULT_USER.currentStreak,
                     max_streak: DEFAULT_USER.maxStreak
                 }
