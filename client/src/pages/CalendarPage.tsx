@@ -17,6 +17,8 @@ import { ThemeContext } from '../context/ThemeContext';
 import { createCalendarEntry, editRoutine, fetchCalendar } from "../utils/routine-utils";
 import { CalendarEntry } from "../types";
 import { parseRoutine, stringifyRoutine } from "../utils/parse";
+import { UserContext } from '../context/UserContext';
+const API_BASE_URL = 'http://localhost:3001';
 
 // Types
 export type Routine = {
@@ -71,13 +73,14 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [repeatDates, setRepeatDates] = useState<Date[]>([]); 
   const port = process.env.PORT || 3001;
+  const { user,setUser } = useContext(UserContext);
 
     // Add this useEffect to fetch streaks and email when component mounts
     useEffect(() => {
       const fetchStreaks = async () => {
           try {
               // Using the getUser endpoint instead
-              const response = await fetch('http://localhost:3001/users/testuser@example.com', {
+              const response = await fetch(`${API_BASE_URL}/users/${user}`, {
                   method: 'GET',
                   headers: {
                       'Content-Type': 'application/json',
@@ -102,7 +105,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       const loadCalendar = async () => {
       try {
         console.log("email:", email)
-        const response = await fetch(`http://localhost:3001/calendar/testuser@example.com`, {
+        const response = await fetch(`${API_BASE_URL}/users/${user}`, {
           method: "GET",
           headers: {
               "Content-Type": "application/json",
@@ -141,7 +144,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           const entry = await fetchCalendar(email, dateKey);
           if (entry.email === "") {
             createCalendarEntry(email, {
-              id: "",
+              id: crypto.randomUUID(), // Generate a unique ID,
               email: email,
               calendar_day: dateKey,
               time_start: "",
@@ -170,7 +173,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             const entry = await fetchCalendar(email, dateKey);
             if (entry.email === "") {
               createCalendarEntry(email, {
-              id: "",
+              id: crypto.randomUUID(), // Generate a unique ID,
               email: email,
               calendar_day: dateKey,
               time_start: "",

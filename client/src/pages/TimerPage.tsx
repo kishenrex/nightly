@@ -42,14 +42,12 @@ let navigate = useNavigate();
         email: `${user}`, // Replace with dynamic user email
         calendar_day: new Date().toISOString().split('T')[0], // Current date
         time_start: new Date().toISOString(), // Replace with actual start time
-        time_end: new Date().toISOString(), // Replace with actual end time
         time_slept: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
         checklist: JSON.stringify([]),
-        desired_bedtime: '22:00:00', // Example static value
-        desired_reminder_time: '21:30:00', // Example static value
+        bedtime: '22:00:00', // Example static value
       };
 
-      const response = await axios.post(`${API_BASE_URL}/calendar`, calendarEntry);
+      const response = await axios.post(`${API_BASE_URL}/calendar/${user}`, calendarEntry);
       console.log('Timer data sent successfully:', response.data);
     } catch (error) {
       console.error('Error sending timer data to backend:', error);
@@ -59,7 +57,7 @@ let navigate = useNavigate();
   
   const fetchCalendarEntries = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/calendar`); // Backend endpoint
+      const response = await fetch(`${API_BASE_URL}/calendar/${user}`); // Backend endpoint
       const { data } = await response.json();
       console.log('Fetched calendar entries:', data);
     } catch (err) {

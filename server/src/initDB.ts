@@ -32,7 +32,7 @@ const initDB = async () => {
                     password TEXT NOT NULL,
                     avatar TEXT,
                     current_streak INTEGER DEFAULT 0,
-                    max_streak INTEGER DEFAULT 0
+                    max_streak INTEGER DEFAULT 0,
                     theme TEXT DEFAULT 'light',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -41,8 +41,8 @@ const initDB = async () => {
 
             // Copy data from the old table to the new table, setting `theme` to its default value
             await db.exec(`
-                INSERT INTO users (email, username, password, avatar, streak, created_at, updated_at)
-                SELECT email, username, password, avatar, streak, created_at, updated_at
+                INSERT INTO users (email, username, password, avatar, current_streak, max_streak, theme, created_at, updated_at)
+                SELECT email, username, password, avatar, current_streak, max_streak, theme, created_at, updated_at
                 FROM users_old;
             `);
 
@@ -93,11 +93,11 @@ const initDB = async () => {
         await db.run(`
             INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak, theme)
             VALUES 
-                ('testuser@example.com', 'Test User', 'password123', 'pokemon_starters.jpeg', 3, 'dark'),
-                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 5, 'light');
+                ('testuser@example.com', 'Test User', 'password123', 'pokemon_starters.jpeg', 4, 8, 'dark'),
+                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 2, 5, 'light');
         `);
 
-        // Insert test data into `calendar_entries` table
+       // Insert test data into `calendar_entries` table
         await db.run(`
             INSERT OR IGNORE INTO calendar_entries (id, email, calendar_day, time_start, time_slept, checklist, bedtime)
             VALUES 
