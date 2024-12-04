@@ -7,7 +7,6 @@ import { Database } from "sqlite";
 
 
 
-// const db = await initDB();
 
 passport.use(
   new GoogleStrategy(
@@ -21,31 +20,26 @@ passport.use(
       console.log(account);
       console.log("email is " + account.email);
       //check if user already exists
-      // try {
-      //   const user = getUser(account.email);
-      //   if (user.email == 'johnnyappleseed@nightly.com') {
-      //     createUser(account.email, account.name, "", "");
-      //   }
-      // } catch (error) {
-      //   console.log(error + "db operation failed when logging user in")
-      // }
-
       try {
         const db: Database = await initDB();
-        const { email } = account.email;
-        console.log('Fetching user with email:', email);
-        
+        console.log('Fetching user with email:', account.email);
+        //check if user already exists in db
         const user = await db.get(
             'SELECT email, username, avatar, streak FROM users WHERE email = ?', 
-            [email]
+            [account.email]
         );
-        
-        if (!user) {
+        // console.log("user not found" + user)
+        if (user == undefined) {
             // If user doesn't exist, create it
-            await db.run(
+            // await db.run('DELETE FROM users WHERE email="kthevandran@ucsd.edu"')
+            console.log('deleted');
+            const newUser = await db.run(
                 'INSERT INTO users (email, username, password, avatar, streak) VALUES (?, ?, ?, ?, ?)',
-                [account.email, account.name, '', '', 0]
+                [account.email, account.name, '', 'default.png', 0]
             );
+        } else {
+          //in this case the user exists
+          console.log("user exists with email" + user.email);
         }
     } catch (error) {
         console.error('Database error:', error);
