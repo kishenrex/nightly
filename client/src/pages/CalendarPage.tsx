@@ -35,6 +35,7 @@ export type TimeMap = {
 
 type NightRoutineProps = {
   selectedDate: Date;
+  setRepeatDates: React.Dispatch<React.SetStateAction<Date[]>>;
   routines: Routine[];
   routinesByDate: RoutinesMap;
   bedTime: string;
@@ -68,6 +69,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [email, setEmail] = useState<string>("testuser@example.com");
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [repeatDates, setRepeatDates] = useState<Date[]>([]); 
   const port = process.env.PORT || 3001;
 
     // Add this useEffect to fetch streaks and email when component mounts
@@ -131,6 +133,62 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       fetchStreaks();
       loadCalendar();
     }, [month]);
+
+    useEffect(() => {
+      const modifyCalendar = async () => {
+        try {
+          const dateKey = getDateKey(selectedDate)
+          const entry = await fetchCalendar(email, dateKey);
+          if (entry.email === "") {
+            createCalendarEntry(email, {
+              id: "",
+              email: email,
+              calendar_day: dateKey,
+              time_start: "",
+              time_slept: "",
+              checklist: "",
+              bedtime: "00:00",
+            });
+          }
+          if (routinesByDate[dateKey] != undefined) {
+            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+        } catch (error) {
+          console.error('Error modifying calendar:', error);
+        }
+      }
+
+      modifyCalendar();
+    }, [routinesByDate]);
+
+    useEffect(() => {
+        const modifyCalendar = async () => {
+        try {
+          console.log("repeated:", repeatDates);
+          for (const date of repeatDates) {
+            const dateKey = getDateKey(date)
+            const entry = await fetchCalendar(email, dateKey);
+            if (entry.email === "") {
+              createCalendarEntry(email, {
+              id: "",
+              email: email,
+              calendar_day: dateKey,
+              time_start: "",
+              time_slept: "",
+              checklist: "",
+              bedtime: "00:00",
+            });
+          }
+          if (routinesByDate[dateKey] != undefined) {
+            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+        }
+        } catch (error) {
+          console.error('Error modifying calendar:', error);
+        }
+      }
+      modifyCalendar();
+    }, [repeatDates]);
 
     useEffect(() => {
       const modifyCalendar = async () => {
@@ -324,6 +382,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
                 Night Routine Checklist for {selectedDate?.toDateString()}
             </h4>
             <NightRoutine 
+              setRepeatDates={setRepeatDates}
               selectedDate={selectedDate}
               routines={routinesByDate[getDateKey(selectedDate)] || []}
               routinesByDate={routinesByDate}
@@ -496,6 +555,7 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
 };
 
 const NightRoutine: React.FC<NightRoutineProps> = ({ 
+  setRepeatDates,
   selectedDate, 
   routines, 
   routinesByDate,
@@ -585,6 +645,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
       const day = selectedDate?.getDay();
       let populate = numRepeat;
       let updated = null;
+      const newRepeatDates: Date[] = [];
       newRepeat.forEach(element => {
         populate =numRepeat;
         updated = selectedDate;
@@ -593,11 +654,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 0-day);
             if (day !== 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -607,11 +670,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 1-day);
             if (day !== 1) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -620,11 +685,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 2-day);
             if (day !== 2) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -633,11 +700,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 3-day);
             if (day !== 3) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -646,11 +715,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 4-day);
             if (day !== 4) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -659,11 +730,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 5-day);
             if (day !== 5) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -672,11 +745,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 6-day);
             if (day !== 6) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -685,6 +760,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             break;
         }
       });
+      setRepeatDates(newRepeatDates);
     }
 
     setNumRepeat(1);
