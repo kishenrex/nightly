@@ -1,6 +1,6 @@
 import { createContext, useState } from "react";
 import { avatarList } from "../styles/Avatars";
-
+// sets avatar profile across componenets
 interface AvatarContextType {
     avatar: string;
     setAvatar: React.Dispatch<React.SetStateAction<string>>;

@@ -7,6 +7,7 @@ function googleLoginProcedure(): void {
   window.open("http://localhost:3001/auth/google", "_self")
 }
 
+// login button leads to calendar page
 function LoginButton(): JSX.Element {
   const { theme } = useContext(ThemeContext);
 

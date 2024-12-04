@@ -1,5 +1,5 @@
 import React, { SetStateAction, useState } from 'react';
-
+// sets theme across componenets
 export const themes = {
  light: {
   boolean: true,

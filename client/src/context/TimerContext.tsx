@@ -1,7 +1,7 @@
 import React from 'react'
 import { createContext, useRef } from 'react'
 import { useState, useEffect} from 'react'
-
+// ensures that timer is persistent
 interface TimerContextType {
     time: number;
     setTime: React.Dispatch<React.SetStateAction<number>>;

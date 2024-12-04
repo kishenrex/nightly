@@ -93,7 +93,7 @@ const initDB = async () => {
         await db.run(`
             INSERT OR IGNORE INTO users (email, username, password, avatar, streak, theme)
             VALUES 
-                ('testuser@example.com', 'Test User', 'password123', 'default.png', 3, 'dark'),
+                ('testuser@example.com', 'Test User', 'password123', 'pokemon_starters.jpeg', 3, 'dark'),
                 ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 5, 'light');
         `);
 

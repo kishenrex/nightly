@@ -1,10 +1,10 @@
 import '../styles/LandingPageStyles.css';
 import LoginButton from '../components/LoginButton';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 
-
+// first page the user sees
 function LandingPage(): JSX.Element {
   const { theme } = useContext(ThemeContext);
 return (

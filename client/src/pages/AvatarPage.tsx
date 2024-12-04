@@ -9,10 +9,12 @@ import { AvatarContext } from '../context/AvatarContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { avatarList } from '../styles/Avatars';
 import { Modal } from 'react-bootstrap';
+import { UserContext } from '../context/UserContext';
 const API_BASE_URL = 'http://localhost:3001';
-
+// page to choose avatars
 function AvatarPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
+  let { user, setUser} = useContext(UserContext);
   let { setAvatar } = useContext(AvatarContext);
   const {theme} = useContext(ThemeContext);
   const [show, setShow] = useState(false);
@@ -22,7 +24,7 @@ function AvatarPage(): JSX.Element {
     try {
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/users/testuser@example.com`, {
+      const response = await fetch(`${API_BASE_URL}/users/${user}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +64,7 @@ backgroundColor: theme.background }}>
 
   <div style={{ display: "flex", gridTemplateColumns: "repeat(3, 1fr)", gridGap: 450, 
         justifyContent:'center', alignItems: 'center'}}>
-    <Link to="/profile" className="text-decoration-none">
+    <Link to="/calendar" className="text-decoration-none">
       <Button variant="outline-light" className="d-flex align-items-center gap-2">
         <i className="bi bi-arrow-90deg-left" style={{ fontSize: '1.5rem', color: theme.fontColor }}></i>
         <span style={{ fontSize: '1.5rem' , color: theme.fontColor}}>Back</span>

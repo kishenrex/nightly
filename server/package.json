@@ -13,19 +13,23 @@
   "description": "",
   "dependencies": {
     "@types/passport": "^1.0.17",
+    "@types/react-dom": "^18.3.1",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "server": "file:",
-    "sqlite": "^5.1.1",
     "passport": "^0.5.3",
     "passport-google-oauth20": "^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "server": "file:",
+    "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.3",
+    "@types/react": "^18.3.12",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"

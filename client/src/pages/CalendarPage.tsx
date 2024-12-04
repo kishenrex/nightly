@@ -151,7 +151,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           </div>
           
           <div className="d-flex align-items-center gap-5">
-            <Link to="/profile" className="text-white">
+            <Link to="/avatars" className="text-white">
               <UserAvatar/>
             </Link>
             <div style={{paddingRight: '20px'}}>

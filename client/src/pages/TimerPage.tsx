@@ -9,6 +9,7 @@ import Alert from 'react-bootstrap/Alert';
 import { ThemeContext } from '../context/ThemeContext';
 import { TimerContext } from '../context/TimerContext';
 import axios from 'axios';
+import { UserContext } from '../context/UserContext';
 
 const API_BASE_URL = 'http://localhost:3001'; // Backend base URL
 
@@ -26,6 +27,7 @@ const {time, setTime, running, setRunning} = useContext(TimerContext);
 const [calendarEntries, setCalendarEntries] = useState([]); // To store fetched calendar data
 const [error, setError] = useState<string | null>(null);
 const [isLoading, setIsLoading] = useState(true);
+const {user, setUser } = useContext(UserContext);
 
 let navigate = useNavigate(); 
   const routeChange = () =>{ 
@@ -37,7 +39,7 @@ let navigate = useNavigate();
     try {
       const calendarEntry = {
         id: crypto.randomUUID(), // Generate a unique ID
-        email: 'user@example.com', // Replace with dynamic user email
+        email: `${user}`, // Replace with dynamic user email
         calendar_day: new Date().toISOString().split('T')[0], // Current date
         time_start: new Date().toISOString(), // Replace with actual start time
         time_end: new Date().toISOString(), // Replace with actual end time
