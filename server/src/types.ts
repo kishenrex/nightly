@@ -4,9 +4,7 @@ export interface User {
     password: string;
     calendar_table: string;
     avatar: string;
-    theme: string;
-    currentStreak: string;
-    maxStreak: string;
+    streak: number;
 }
 
 export interface CalendarEntry {
@@ -14,7 +12,9 @@ export interface CalendarEntry {
     email: string;
     calendar_day: string;
     time_start: string;
+    time_end: string;
     time_slept: string;
     checklist: string;
-    bedtime: string;
+    desired_bedtime: string;
+    desired_reminder_time: string;
 }

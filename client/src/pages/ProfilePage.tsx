@@ -20,29 +20,26 @@ type User = {
   email: string;
   username: string;
   avatar: string | null;
-  currentStreak: number;
-  maxStreak: number;
+  streak: number;
 };
 
 const API_BASE_URL = 'http://localhost:3001';
 
+const DEFAULT_USER = {
+  email: 'johnnyappleseed@nightly.com',
+  username: 'JohnMachine222',
+  password: 'mySecurePassword123',
+  avatar: 'pokemon_starters.jpeg',
+  streak: 0
+};
+
 const ProfilePage: React.FC = () => {
-  const tempUser: User = {
-    email: "johnnyappleseed@nightly.com",
-    username: "temp",
-    avatar: null,
-    currentStreak: 0,
-    maxStreak: 0
-  };
-
-  const initialFields: ProfileField[] = [
-    { label: 'Username', value: tempUser.username, key: 'username' },
+  const [user, setUser] = useState<User>(DEFAULT_USER);
+  const [profileFields, setProfileFields] = useState<ProfileField[]>([
+    { label: 'Username', value: DEFAULT_USER.username, key: 'username' },
     { label: 'Password', value: '••••••••••••••', type: 'password', masked: true, key: 'password' },
-    { label: 'Email', value: tempUser.email, key: 'email' }
-  ];
-
-  const [user, setUser] = useState<User>(tempUser);
-  const [profileFields, setProfileFields] = useState<ProfileField[]>(initialFields);
+    { label: 'Email', value: DEFAULT_USER.email, key: 'email' }
+  ]);
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [editValue, setEditValue] = useState('');
@@ -51,57 +48,45 @@ const ProfilePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const {theme} = useContext(ThemeContext);
   const {avatar} = useContext(AvatarContext);
-
   useEffect(() => {
     const initializeUser = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        console.log('Attempting to fetch user data...');
-        const response = await fetch(`${API_BASE_URL}/users/testuser@example.com`);
-        console.log(response);
-        console.log('Response status:', response.status);
-        const responseText = await response.text();
-        console.log('Response text:', responseText);
+        // First try to create the user
+        const createResponse = await fetch(`${API_BASE_URL}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(DEFAULT_USER)
+        });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
+        // Then fetch the user data
+        const getResponse = await fetch(`${API_BASE_URL}/users/${DEFAULT_USER.email}`);
+        
+        if (!getResponse.ok) {
+          throw new Error('Failed to fetch user data');
         }
 
-        const responseData = JSON.parse(responseText);
-        console.log('Parsed response data:', responseData);
+        const { data } = await getResponse.json();
 
-        const userData = responseData.data;
-        if (!userData) {
-          throw new Error('No user data received in response');
-        }
-
-        console.log('User data:', userData);
-
-        const defaultUser = {
-          email: userData.email,
-          username: userData.username,
-          avatar: userData.avatar,
-          currentStreak: userData.current_streak || 0,
-          maxStreak: userData.max_streak || 0
-        };
-
-        console.log('Setting user state with:', defaultUser);
-        setUser(defaultUser);
+        setUser({
+          email: data.email,
+          username: data.username,
+          avatar: data.avatar,
+          streak: data.streak || 0
+        });
 
         setProfileFields([
-          { label: 'Username', value: defaultUser.username, key: 'username' },
+          { label: 'Username', value: data.username, key: 'username' },
           { label: 'Password', value: '••••••••••••••', type: 'password', masked: true, key: 'password' },
-          { label: 'Email', value: defaultUser.email, key: 'email' }
+          { label: 'Email', value: data.email, key: 'email' }
         ]);
       } catch (err) {
-        console.error('Detailed error:', err);
-        if (err instanceof Error) {
-          setError(`Failed to load user data: ${err.message}`);
-        } else {
-          setError('Failed to load user data. Please refresh the page.');
-        }
+        console.error('Error initializing user:', err);
+        setError('Failed to load user data. Please refresh the page.');
       } finally {
         setIsLoading(false);
       }
@@ -256,10 +241,7 @@ const ProfilePage: React.FC = () => {
             Profile
           </h1>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: theme.fontColor }}>
-              <span>Current Streak: {user.currentStreak} days</span>
-              <span>Max Streak: {user.maxStreak} days</span>
-            </div>
+            <span style={{color: theme.fontColor}}>Streak: {user.streak} days</span>
             <HomeButton></HomeButton>
           </div>
         </div>
