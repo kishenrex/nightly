@@ -4,8 +4,9 @@ export interface User {
     password: string;
     calendar_table: string;
     avatar: string;
-    streak: number;
     theme: string;
+    currentStreak: string;
+    maxStreak: string;
 }
 
 export interface CalendarEntry {

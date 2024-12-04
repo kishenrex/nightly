@@ -7,7 +7,6 @@ const DEFAULT_USER = {
     username: 'JohnMachine222',
     password: 'mySecurePassword123',
     avatar: 'pokemon_starters.jpeg',
-    streak: 0,
     theme: 'light', // Default theme
     currentStreak: 0,
     maxStreak: 0
@@ -15,18 +14,18 @@ const DEFAULT_USER = {
 
 export async function createUser(req: Request, res: Response, db: Database) {
     try {
-        const { email, username, password, avatar, theme } = req.body as User;
+        const { email, username, password, avatar, theme, currentStreak, maxStreak } = req.body as User;
 
         if (!email || !username || !password) {
             return res.status(400).send({ error: "Missing required fields" });
         }
 
         await db.run(
-            'INSERT INTO users (email, username, password, avatar, streak, theme) VALUES (?, ?, ?, ?, 0, ?)',
+            'INSERT INTO users (email, username, password, avatar, theme, currentStreak, maxStreak) VALUES (?, ?, ?, ?, ?, ?, 0, 0)',
             [email, username, password, avatar || null, theme || 'light']
         );
         
-        res.status(201).send({ email, username, avatar, theme });
+        res.status(201).send({ email, username, avatar, theme, currentStreak, maxStreak});
     } catch (error) {
         return res.status(400).send({ error: `User could not be created: ${error}` });
     }
@@ -38,14 +37,15 @@ export async function getUser(req: Request, res: Response, db: Database) {
         console.log('Fetching user with email:', email);
         
         const user = await db.get(
-            'SELECT email, username, avatar, current_streak, max_streak FROM users WHERE email = ?',
+            'SELECT email, username, avatar, theme, current_streak, max_streak FROM users WHERE email = ?',
             [email]
         );
         
         if (!user && email === DEFAULT_USER.email) {
             await db.run(
-                'INSERT INTO users (email, username, password, current_streak, max_streak) VALUES (?, ?, ?, ?, ?)',
-                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password, DEFAULT_USER.currentStreak, DEFAULT_USER.maxStreak]
+                'INSERT INTO users (email, username, password, avatar, theme, current_streak, max_streak) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [DEFAULT_USER.email, DEFAULT_USER.username, DEFAULT_USER.password,DEFAULT_USER.avatar,
+                 DEFAULT_USER.theme, DEFAULT_USER.currentStreak, DEFAULT_USER.maxStreak]
             );
             
             return res.status(200).send({ 
@@ -53,7 +53,6 @@ export async function getUser(req: Request, res: Response, db: Database) {
                     email: DEFAULT_USER.email,
                     username: DEFAULT_USER.username,
                     avatar: DEFAULT_USER.avatar,
-                    streak: DEFAULT_USER.streak,
                     theme: DEFAULT_USER.theme,
                     current_streak: DEFAULT_USER.currentStreak,
                     max_streak: DEFAULT_USER.maxStreak
@@ -97,7 +96,7 @@ export async function updateUser(req: Request, res: Response, db: Database) {
 
         // Fetch updated user data
         const updatedUser = await db.get(
-            'SELECT email, username, avatar, streak, theme FROM users WHERE email = ?', 
+            'SELECT email, username, avatar, theme, current_streak, max_streak FROM users WHERE email = ?', 
             [email]
         );
 
@@ -114,9 +113,9 @@ export async function updateUser(req: Request, res: Response, db: Database) {
 export async function updateStreak(req: Request, res: Response, db: Database) {
     try {
         const { email } = req.params;
-        const { streak } = req.body;
+        const { currentStreak } = req.body;
 
-        const result = await db.run('UPDATE users SET streak = ? WHERE email = ?', [streak, email]);
+        const result = await db.run('UPDATE users SET streak = ? WHERE email = ?', [currentStreak, email]);
         
         if (result.changes === 0) {
             return res.status(404).send({ error: "User not found" });
@@ -125,6 +124,24 @@ export async function updateStreak(req: Request, res: Response, db: Database) {
         return res.status(200).send({ message: "Streak updated successfully" });
     } catch (error) {
         return res.status(400).send({ error: `Failed to update streak: ${error}` });
+    }
+}
+
+//updates the user's avatar
+export async function updateAvatar(req: Request, res: Response, db: Database) {
+    try {
+        const { email } = req.params;
+        const { avatar } = req.body;
+
+        const result = await db.run('UPDATE users SET avatar = ? WHERE email = ?', [avatar, email]);
+        
+        if (result.changes === 0) {
+            return res.status(404).send({ error: "User not found" });
+        }
+
+        return res.status(200).send({ message: "Avatar updated successfully" });
+    } catch (error) {
+        return res.status(400).send({ error: `Failed to update avatar: ${error}` });
     }
 }
 

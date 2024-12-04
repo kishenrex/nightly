@@ -9,20 +9,50 @@ import { AvatarContext } from '../context/AvatarContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { avatarList } from '../styles/Avatars';
 import { Modal } from 'react-bootstrap';
-
+import { UserContext } from '../context/UserContext';
+const API_BASE_URL = 'http://localhost:3001';
+// page to choose avatars
 function AvatarPage(): JSX.Element {
+  const [error, setError] = useState<string | null>(null);
+  let { user, setUser} = useContext(UserContext);
   let { setAvatar } = useContext(AvatarContext);
   const {theme} = useContext(ThemeContext);
-  const changeAvatar = (chosenAvatar: number) => {
-    setAvatar(avatarList[chosenAvatar].url);
-  };
   const [show, setShow] = useState(false);
   const [disabled, setDisabled] = useState(false);
+  const [lockedMessage, setLockedMessage] = useState(0);
+  const changeAvatar = async (chosenAvatar: number) => {
+    try {
+      setError(null);
+
+      const response = await fetch(`${API_BASE_URL}/users/${user}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          avatar: avatarList[chosenAvatar].url
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user avatar');
+      }
+    setAvatar(avatarList[chosenAvatar].url);
+  }catch (err) {
+      console.error('Update error:', err);
+      setError('Failed to update user avatar. Please try again.');
+    }
+  };
   const handleShow = (locked: any, avatarNum: number) => {
     if (locked) {
+      if (avatarNum === 2 || avatarNum === 5 || avatarNum === 8){
+        setLockedMessage(50);
+      } else if (avatarNum === 3 || avatarNum === 6 || avatarNum === 9){
+        setLockedMessage(100);
+      }
       setShow(true);
     } else {
-      changeAvatar(avatarNum)
+      changeAvatar(avatarNum);
     }
   };
   const handleClose = () => {
@@ -34,7 +64,7 @@ backgroundColor: theme.background }}>
 
   <div style={{ display: "flex", gridTemplateColumns: "repeat(3, 1fr)", gridGap: 450, 
         justifyContent:'center', alignItems: 'center'}}>
-    <Link to="/profile" className="text-decoration-none">
+    <Link to="/calendar" className="text-decoration-none">
       <Button variant="outline-light" className="d-flex align-items-center gap-2">
         <i className="bi bi-arrow-90deg-left" style={{ fontSize: '1.5rem', color: theme.fontColor }}></i>
         <span style={{ fontSize: '1.5rem' , color: theme.fontColor}}>Back</span>
@@ -110,7 +140,7 @@ backgroundColor: theme.background }}>
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar2_2" aria-label= 'avatar2_2' disabled={disabled} 
-          onClick={() => {handleShow(true, 6);}}>
+          onClick={() => {handleShow(true, 5);}}>
              <div style= {{width: '50px', height: '50px',}}className="lock"></div>
         </Button>
       </div>
@@ -166,7 +196,7 @@ backgroundColor: theme.background }}>
         <Modal.Header closeButton>
           <Modal.Title>Locked</Modal.Title>
         </Modal.Header>
-           <Modal.Body>You need
+           <Modal.Body>You need a streak of {lockedMessage} to unlock this avatar
           </Modal.Body>
       </Modal>
 
