@@ -31,7 +31,8 @@ const initDB = async () => {
                     username TEXT NOT NULL,
                     password TEXT NOT NULL,
                     avatar TEXT,
-                    streak INTEGER DEFAULT 0,
+                    current_streak INTEGER DEFAULT 0,
+                    max_streak INTEGER DEFAULT 0
                     theme TEXT DEFAULT 'light',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -61,7 +62,8 @@ const initDB = async () => {
                     username TEXT NOT NULL,
                     password TEXT NOT NULL,
                     avatar TEXT,
-                    streak INTEGER DEFAULT 0,
+                    current_streak INTEGER DEFAULT 0,
+                    max_streak INTEGER DEFAULT 0,
                     theme TEXT DEFAULT 'light',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -72,15 +74,13 @@ const initDB = async () => {
         // Create the `calendar_entries` table
         await db.exec(`
             CREATE TABLE IF NOT EXISTS calendar_entries (
-                id TEXT PRIMARY KEY,
+                id TEXT,
                 email TEXT NOT NULL,
                 calendar_day TEXT NOT NULL,
                 time_start TEXT,
-                time_end TEXT,
                 time_slept TEXT,
                 checklist TEXT,
-                desired_bedtime TEXT,
-                desired_reminder_time TEXT,
+                bedtime TEXT,
                 FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
             );
         `);
@@ -91,7 +91,7 @@ const initDB = async () => {
 
         // Insert test data into `users` table
         await db.run(`
-            INSERT OR IGNORE INTO users (email, username, password, avatar, streak, theme)
+            INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak, theme)
             VALUES 
                 ('testuser@example.com', 'Test User', 'password123', 'pokemon_starters.jpeg', 3, 'dark'),
                 ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 5, 'light');
@@ -99,10 +99,10 @@ const initDB = async () => {
 
         // Insert test data into `calendar_entries` table
         await db.run(`
-            INSERT OR IGNORE INTO calendar_entries (id, email, calendar_day, time_start, time_end, time_slept, checklist, desired_bedtime, desired_reminder_time)
+            INSERT OR IGNORE INTO calendar_entries (id, email, calendar_day, time_start, time_slept, checklist, bedtime)
             VALUES 
-                ('1', 'testuser@example.com', '2024-11-20', '22:00', '06:00', '8', '{"task1": "done", "task2": "pending"}', '22:00', '21:30'),
-                ('2', 'exampleuser@example.com', '2024-11-21', '23:00', '07:00', '8', '{"task1": "completed", "task2": "pending"}', '23:00', '22:30');
+                ('1', 'testuser@example.com', '2024-11-20', '22:00', '06:00', '0|Title|Descript;1|Title2|Descript2', '21:30'),
+                ('2', 'exampleuser@example.com', '2024-11-21', '23:00', '07:00', '0|Title|Descript;1|Title2|Descript2', '22:30');
         `);
 
         console.log('Test data added to database.'); // Debug log

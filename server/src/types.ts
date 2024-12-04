@@ -13,9 +13,7 @@ export interface CalendarEntry {
     email: string;
     calendar_day: string;
     time_start: string;
-    time_end: string;
     time_slept: string;
     checklist: string;
-    desired_bedtime: string;
-    desired_reminder_time: string;
+    bedtime: string;
 }
