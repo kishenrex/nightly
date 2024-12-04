@@ -59,11 +59,9 @@
                     email: TEST_EMAIL,
                     calendar_day: "2024-03-11",
                     time_start: "22:30",
-                    time_end: "08:30",
                     time_slept: "10:00",
-                    checklist: '["(O)brush your teeth", "(O)read book", "(O)meditation"]',
-                    desired_bedtime: "22:00",
-                    desired_reminder_time: "21:30"
+                    checklist: "O|brush your teeth|-;O|read book| ;O|meditation|-",
+                    bedtime: "22:00",
                 })
             });
             const data = await response.json();

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import '../styles/checklist.css';
 import { Link } from 'react-router-dom';
 import { addDays } from 'date-fns';
@@ -14,30 +14,34 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { UserAvatar } from '../components/UserAvatar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { ThemeContext } from '../context/ThemeContext';
+import { createCalendarEntry, editRoutine, fetchCalendar } from "../utils/routine-utils";
+import { CalendarEntry } from "../types";
+import { parseRoutine, stringifyRoutine } from "../utils/parse";
 
 // Types
-type Routine = {
+export type Routine = {
   title: string;
   text: string;
   completed: boolean;
 };
 
-type RoutinesMap = {
+export type RoutinesMap = {
   [dateKey: string]: Routine[];
 };
 
-type TimeMap = {
+export type TimeMap = {
   [dateKey: string]: string;
 };
 
 type NightRoutineProps = {
   selectedDate: Date;
+  setRepeatDates: React.Dispatch<React.SetStateAction<Date[]>>;
   routines: Routine[];
   routinesByDate: RoutinesMap;
   bedTime: string;
   timesByDate: TimeMap;
   onAddTime: (newDate: Date, bedTime: string) => void;
-  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string) => void;
+  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string, completed: boolean) => void;
   onEditRoutine: (newDate: Date, routineTitle: string, routineText: string, index: number) => void;
   onToggleRoutine: (index: number) => void;
   onDeleteRoutine: (index: number) => void;
@@ -48,19 +52,194 @@ type CalendarProps = {
   onSelectDate: (date: Date) => void;
   selectedDate: Date;
   timesByDate: TimeMap;
+  currentMonth: number;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<number>>;
+};
+// Add these types at the top with other type definitions
+type Streaks = {
+  currentStreak: number;
+  maxStreak: number;
 };
 
 const ChecklistPage: React.FC = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
+  const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
+  const [email, setEmail] = useState<string>("testuser@example.com");
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [repeatDates, setRepeatDates] = useState<Date[]>([]); 
+  const port = process.env.PORT || 3001;
+
+    // Add this useEffect to fetch streaks and email when component mounts
+    useEffect(() => {
+      const fetchStreaks = async () => {
+          try {
+              // Using the getUser endpoint instead
+              const response = await fetch('http://localhost:3001/users/testuser@example.com', {
+                  method: 'GET',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+              });
+  
+              if (!response.ok) {
+                  throw new Error('Failed to fetch streaks');
+              }
+  
+              const {data} = await response.json();
+              setStreaks({
+                  currentStreak: data.current_streak || 0,
+                  maxStreak: data.max_streak || 0
+              });
+              setEmail(data.email)
+          } catch (error) {
+              console.error('Error fetching streaks:', error);
+          }
+      };
+  
+      const loadCalendar = async () => {
+      try {
+        console.log("email:", email)
+        const response = await fetch(`http://localhost:3001/calendar/testuser@example.com`, {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch calendar');
+        }
+
+        const data = await response.json();
+        let rout = null;
+        data.calendar.forEach((d: CalendarEntry) => {
+          if (parseInt(d.calendar_day.split("-")[1]) === month) {
+            rout = parseRoutine(d.checklist);
+            rout.forEach((r: Routine) => {
+              if (!routinesByDate[d.calendar_day] && r.title != undefined) {
+                handleAddRoutine(new Date(d.calendar_day), r.title, r.text, r.completed);
+              }
+            });
+          }
+        });
+        } catch (error) {
+          console.error('Error fetching calendar:', error);
+      }
+      };
+  
+      fetchStreaks();
+      loadCalendar();
+    }, [month]);
+
+    useEffect(() => {
+      const modifyCalendar = async () => {
+        try {
+          const dateKey = getDateKey(selectedDate)
+          const entry = await fetchCalendar(email, dateKey);
+          if (entry.email === "") {
+            createCalendarEntry(email, {
+              id: "",
+              email: email,
+              calendar_day: dateKey,
+              time_start: "",
+              time_slept: "",
+              checklist: "",
+              bedtime: "00:00",
+            });
+          }
+          if (routinesByDate[dateKey] != undefined) {
+            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+        } catch (error) {
+          console.error('Error modifying calendar:', error);
+        }
+      }
+
+      modifyCalendar();
+    }, [routinesByDate]);
+
+    useEffect(() => {
+        const modifyCalendar = async () => {
+        try {
+          console.log("repeated:", repeatDates);
+          for (const date of repeatDates) {
+            const dateKey = getDateKey(date)
+            const entry = await fetchCalendar(email, dateKey);
+            if (entry.email === "") {
+              createCalendarEntry(email, {
+              id: "",
+              email: email,
+              calendar_day: dateKey,
+              time_start: "",
+              time_slept: "",
+              checklist: "",
+              bedtime: "00:00",
+            });
+          }
+          if (routinesByDate[dateKey] != undefined) {
+            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+        }
+        } catch (error) {
+          console.error('Error modifying calendar:', error);
+        }
+      }
+      modifyCalendar();
+    }, [repeatDates]);
+
+    useEffect(() => {
+      const modifyCalendar = async () => {
+        try {
+          const dateKey = getDateKey(selectedDate)
+          const entry = await fetchCalendar(email, dateKey);
+          if (entry.email === "") {
+            createCalendarEntry(email, {
+              id: "",
+              email: email,
+              calendar_day: dateKey,
+              time_start: "",
+              time_slept: "",
+              checklist: "",
+              bedtime: "00:00",
+            });
+          }
+          if (routinesByDate[dateKey] != undefined) {
+            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+        } catch (error) {
+          console.error('Error fetching calendar:', error);
+        }
+      }
+
+      modifyCalendar();
+    }, [routinesByDate]);
 
   const getDateKey = (date: Date): string => {
     return date ? date.toISOString().split('T')[0] : '';
   };
 
-  const handleSelectDate = (date: Date): void => {
+  const handleSelectDate = async (date: Date): Promise<void> => {
     setSelectedDate(date);
+    try {
+      const entry = await fetchCalendar(email, getDateKey(date));
+      if (entry.email === "") {
+        createCalendarEntry(email, {
+          id: "",
+          email: email,
+          calendar_day: getDateKey(date),
+          time_start: "",
+          time_slept: "",
+          checklist: "",
+          bedtime: "00:00",
+        });
+      }
+    }
+    catch (error) {
+      console.error('Error clicking date:', error);
+    }
   };
 
   const handleAddTime = (date: Date, bedTime: string): void => {
@@ -71,7 +250,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string): void => {
+  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string, completed: boolean) => {
     const dateKey = getDateKey(date);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -79,7 +258,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number): void => {
+  const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number) => {
     const dateKey = getDateKey(date);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -89,7 +268,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleToggleRoutine = (index: number): void => {
+  const handleToggleRoutine = (index: number) => {
     const dateKey = getDateKey(selectedDate);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -99,7 +278,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleDeleteRoutine = (index: number): void => {
+  const handleDeleteRoutine = (index: number) => {
     const dateKey = getDateKey(selectedDate);
     setRoutinesByDate(prev => ({
       ...prev,
@@ -136,10 +315,10 @@ const ChecklistPage: React.FC = (): JSX.Element => {
 
           <div className="text-white text-center border-start border-end px-3">
             <div className="d-flex align-items-center gap-2">
-              <i style={{color: theme.fontColor}}className="bi bi-fire"></i>
+              <i style={{color: theme.fontColor}} className="bi bi-fire"></i>
               <span style={{color: theme.fontColor}}>Current Streak</span>
             </div>
-            <Badge bg="success" className="fs-6">100</Badge>
+            <Badge bg="success" className="fs-6">{streaks.currentStreak}</Badge>
           </div>
 
           <div className="text-center border-start border-end px-3">
@@ -147,7 +326,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               <i className="bi bi-fire"></i>
               <span>Max Streak</span>
             </div>
-            <Badge bg="success" className="fs-6">100</Badge>
+            <Badge bg="success" className="fs-6">{streaks.maxStreak}</Badge>
           </div>
           
           <div className="d-flex align-items-center gap-5">
@@ -160,7 +339,13 @@ const ChecklistPage: React.FC = (): JSX.Element => {
 
           </div>
 
-      
+          <div className="d-flex align-items-center gap-5" style={{paddingRight: '40px'}}>
+          <Button  style={{color: theme.fontColor, borderColor: theme.borderColor}} variant="outline-light" className="d-flex align-items-center gap-2"
+              onClick={() => setShowModal(true)}>
+              <i className="bi bi-question-circle fs-5"></i>
+              <span>Help</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -178,6 +363,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               onSelectDate={handleSelectDate}
               selectedDate={selectedDate}
               timesByDate={timesByDate}
+              currentMonth={month}
+              setCurrentMonth={setMonth}
             />
           </div>
 
@@ -192,9 +379,10 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           }}>
             <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: theme.fontColor }}>
                { theme.boolean ? <i style={{ fontSize: '2rem'}} className="bi bi-sun"></i> : <i style={{ fontSize: '2rem'}} className="bi bi-moon-stars"></i>}
-                Night Routine for {selectedDate?.toDateString()}
+                Night Routine Checklist for {selectedDate?.toDateString()}
             </h4>
             <NightRoutine 
+              setRepeatDates={setRepeatDates}
               selectedDate={selectedDate}
               routines={routinesByDate[getDateKey(selectedDate)] || []}
               routinesByDate={routinesByDate}
@@ -208,13 +396,61 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               onAddTime={handleAddTime}
             />
           </div>
+
+          {/*Instructions*/}
+          <Modal show={showModal} onHide={() => setShowModal(false)} 
+            size="lg" centered >
+              <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
+            <Modal.Header closeButton closeVariant="white">
+              <Modal.Title>Help</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <dl>
+                <dt>Calendar: </dt>
+                <dd>Click on a day to view and edit the night routine checklist for that day. Click on the arrow keys
+                  to switch months. Each cell also holds the expected bedtime/actual sleep time for the day.
+                </dd>
+                <dt>Night Routine: </dt>
+                <dd>Each night routine has a main description that is required and then any extra details or notes the user 
+                  would want to add that is optional. The night routines can be anything the user would want/need to do before they sleep.
+                </dd>
+                <dt>Bedtime: </dt>
+                <dd>The user can set an expected/desired bedtime for each day. Once the day passes, it is replaced by the actual
+                  elapsed sleep time they record each night. For example, before the current day it might be 10:00 pm for the expected 
+                  bedtime, and then after the current day, it could show 8:32:05 (8 hours, 32 minutes, and 5 seconds) for the actual elapsed sleep time. 
+                </dd>
+                <dt>Repeat: </dt>
+                <dd>The user can set recurrences for each night routine by choosing the days of the week to repeat, along
+                  with the number of weeks to repeat it for. This will completely replace any previously set routines on those days with the new ones.
+                </dd>
+                <dt>Night Routines Window: </dt>
+                <dd>The window on the right allow the user to view and edit all of their night routines for a day. 
+                  When they complete a night routine, that is also where they check the item off the checklist. If the user checks all of the
+                  night routines off, they will continue their streak.
+                </dd>
+                <dt>Sleep Stopwatch: </dt>
+                <dd>The stopwatch is used to keep track of how much sleep the user gets every night. Right before the
+                  user sleeps, they should start the stopwatch. When they wake up, they should immediately end the stopwatch. After ending
+                  the stopwatch, they can keep the lapsed time for the bedtime, or they can edit the time if it is inaccurate.
+                </dd>
+                <dt>Streaks: </dt>
+                <dd>The streak is used to keep the user on task with completing all of their tasks each day. Both the current 
+                  streak and the max streak is displayed for the user to keep track. </dd>
+                <dt>Toggle Theme: </dt>
+                <dd>The user can toggle between the day and night theme at their own convenience. </dd>
+              </dl>
+            </Modal.Body>
+            <Modal.Footer>
+            </Modal.Footer>
+            </div>
+          </Modal>
         </div>
       </div>
     </div>
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate }): JSX.Element => {
+const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate, currentMonth, setCurrentMonth }): JSX.Element => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
   const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -265,10 +501,10 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
           {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
         </h3>
         <div>
-          <Button variant="outline-light" className="me-2" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); setCurrentMonth(currentMonth - 1); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
           </Button>
-          <Button variant="outline-light" onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)); setCurrentMonth(currentMonth + 1); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
           </Button>
         </div>
@@ -319,6 +555,7 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
 };
 
 const NightRoutine: React.FC<NightRoutineProps> = ({ 
+  setRepeatDates,
   selectedDate, 
   routines, 
   routinesByDate,
@@ -384,14 +621,14 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
     const dateKey = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
     onDeleteAllRoutine(date);
     routinesByDate[dateKey]?.forEach(rout => {
-      onAddRoutine(date, rout.title, rout.text);
+      onAddRoutine(date, rout.title, rout.text, rout.completed);
     });
     onAddTime(date, timesByDate[dateKey]);
   }
 
   const handleSubmit = (): void => {
     if (newTitle.trim()) {
-      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim());
+      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim(), false);
       setShowModal(false);
     }
   };
@@ -408,6 +645,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
       const day = selectedDate?.getDay();
       let populate = numRepeat;
       let updated = null;
+      const newRepeatDates: Date[] = [];
       newRepeat.forEach(element => {
         populate =numRepeat;
         updated = selectedDate;
@@ -416,11 +654,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 0-day);
             if (day !== 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -430,11 +670,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 1-day);
             if (day !== 1) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -443,11 +685,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 2-day);
             if (day !== 2) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -456,11 +700,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 3-day);
             if (day !== 3) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -469,11 +715,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 4-day);
             if (day !== 4) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -482,11 +730,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 5-day);
             if (day !== 5) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -495,11 +745,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             updated = addDays(selectedDate, 6-day);
             if (day !== 6) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
             }
             updated = addDays(updated, 7);
             
             while (populate > 0) {
               repeatAddRoutine(updated);
+              newRepeatDates.push(updated);
               populate -= 1;
               updated = addDays(updated, 7);
             }
@@ -508,6 +760,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
             break;
         }
       });
+      setRepeatDates(newRepeatDates);
     }
 
     setNumRepeat(1);
@@ -698,13 +951,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         </Modal.Header>
         <Modal.Body>
           <FormControl
-            placeholder="Enter new routine"
+            placeholder="Enter new routine  e.g. Brush teeth"
             value={newTitle}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
           />
           <br/>
           <FormControl
-            placeholder="Enter routine description (optional)"
+            placeholder="Enter routine description (OPTIONAL) e.g. Make sure to switch out old toothbrush"
             value={newRoutine}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
           />
@@ -727,13 +980,13 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         </Modal.Header>
         <Modal.Body>
           <FormControl
-            placeholder="Enter routine"
+            placeholder="Enter new routine  e.g. Brush teeth"
             value={newTitle}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value)}
           />
           <br/>
           <FormControl  style= {{color: theme.fontColor, backgroundColor: theme.background, borderColor: theme.borderColor}}
-            placeholder="Enter routine description (optional)"
+            placeholder="Enter routine description (OPTIONAL) e.g. Make sure to switch out old toothbrush"
             value={newRoutine}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewRoutine(e.target.value)}
           />

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import initDB from './initDB';
 import { createUserEndpoints } from './user/user-endpoints';
-import { createCalendarEndpoints } from './calendar/calendar-endpoints';
+import { createCalendarEndpoints } from './Calendar/calendar-endpoints';
 import { Database } from 'sqlite';
 
 const app = express();
@@ -28,7 +28,7 @@ app.use(passport.session());
 app.use(
   cors({
     origin: "http://localhost:3000",
-    methods: "GET,POST,PUT,DELETE",
+    methods: "GET,POST,PATCH,DELETE",
     credentials: true,
   })
 );
