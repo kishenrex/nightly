@@ -37,7 +37,7 @@ const { theme } = useContext(ThemeContext);
 return (
     <div style= {{ display: 'flex', borderWidth:'10px', }} className='userAvatar'>  
     <Image style={{width:'100px', height: '100px',borderColor: theme.borderColor}}  className="border border-dark border-2"
-      src={require(`../styles/AvatarImages/${avatar}`)} role= 'img' aria-label= 'userAvatar' roundedCircle />
+      src={require(`../styles/AvatarImagesFinal/${avatar}`)} role= 'img' aria-label= 'userAvatar' roundedCircle />
     </div>
   );
 }

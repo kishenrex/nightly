@@ -89,7 +89,7 @@ backgroundColor: theme.background }}>
     <div style={{backgroundColor: theme.foreground, borderRadius: '60px',
      width:'200px', height:'500px', }} className="p-3 border">
        <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{ backgroundImage: `url("${require(`../styles/AvatarImages/Avatar1/raichu.png`)}")`,
+        <Button style={{ backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileFHappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar1_3" aria-label= 'avatar1_3' disabled={disabled}
@@ -100,7 +100,7 @@ backgroundColor: theme.background }}>
       </div>
 
        <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar1/pikachu.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileFNeutral.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar1_2" aria-label= 'avatar1_2' disabled={disabled} 
@@ -110,7 +110,7 @@ backgroundColor: theme.background }}>
       </div>
 
        <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar1/pichu.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileFUnhappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center"}} 
           variant="outline-dark" className="avatar1_1" aria-label= 'avatar1_1' onClick={() => handleShow(false, 1)}>
@@ -126,7 +126,7 @@ backgroundColor: theme.background }}>
      width:'200px', height:'500px'}} className="p-3 border">
 
       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar2/blastoise.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileMHappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar2_3" aria-label= 'avatar2_3' disabled={disabled}>
@@ -136,7 +136,7 @@ backgroundColor: theme.background }}>
       </div>
 
       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar2/wartortle.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileMNeutral.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar2_2" aria-label= 'avatar2_2' disabled={disabled} 
@@ -146,7 +146,7 @@ backgroundColor: theme.background }}>
       </div>
 
        <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar2/squirtle.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileMUnhappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center"}} 
           variant="outline-dark" className="avatar2_1" aria-label= 'avatar2_1' onClick={() => handleShow(false, 4)}>
@@ -161,7 +161,7 @@ backgroundColor: theme.background }}>
     width:'200px', height:'500px'}} className="p-3 border">
 
       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar3/charizard.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileBUnhappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar3_3" aria-label= 'avatar3_3' disabled={disabled} 
@@ -171,7 +171,7 @@ backgroundColor: theme.background }}>
       </div>
 
        <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar3/charmeleon.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileBNeutral.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar3_2" aria-label= 'avatar3_2' disabled={disabled} 
@@ -181,7 +181,7 @@ backgroundColor: theme.background }}>
       </div>
 
        <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImages/Avatar3/charmander.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileBUnhappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center"}} 
           variant="outline-dark" className="avatar3_1" aria-label= 'avatar3_1' onClick={() => handleShow(false, 7)}>
