@@ -1,43 +1,43 @@
 export const avatarList = [
    {
       id: 'avatar_0',
-      url: 'pokemon_starters.jpeg'
+      url: 'NightlyProfileDefault.png'
    },
    {
       id: 'avatar1_1',
-      url: 'Avatar1/pichu.png'
+      url: 'NightlyProfileFUnhappy.png'
    },
    {
       id: 'avatar1_2',
-      url: 'Avatar1/pikachu.png'
+      url: 'NightlyProfileFNeutral.png'
    },
    {
       id: 'avatar1_3',
-      url: 'Avatar1/raichu.png'
+      url: 'NightlyProfileFHappy.png'
    },
    {
       id: 'avatar2_1',
-      url: 'Avatar2/squirtle.png'
+      url: 'NightlyProfileMUnhappy.png'
    },
    {
       id: 'avatar2_2',
-      url: 'Avatar2/wartortle.png'
+      url: 'NightlyProfileMNeutral.png'
    },
    {
       id: 'avatar2_3',
-      url: 'Avatar2/blastoise.png'
+      url: 'NightlyProfileMHappy.png'
    },
    {
       id: 'avatar3_1',
-      url: 'Avatar3/charmander.png'
+      url: 'NightlyProfileBUnhappy.png'
    },
    {
       id: 'avatar3_2',
-      url: 'Avatar3/charmeleon.png'
+      url: 'NightlyProfileBNeutral.png'
    },
    {
       id: 'avatar3_3',
-      url: 'Avatar3/charizard.png'
+      url: 'NightlyProfileBHappy.png'
    }
    
 ]

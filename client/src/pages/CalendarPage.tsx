@@ -68,7 +68,6 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
   const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
-  const [email, setEmail] = useState<string>("testuser@example.com");
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [repeatDates, setRepeatDates] = useState<Date[]>([]); 
@@ -96,7 +95,6 @@ const ChecklistPage: React.FC = (): JSX.Element => {
                   currentStreak: data.current_streak || 0,
                   maxStreak: data.max_streak || 0
               });
-              setEmail(data.email)
           } catch (error) {
               console.error('Error fetching streaks:', error);
           }
@@ -104,8 +102,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   
       const loadCalendar = async () => {
       try {
-        console.log("email:", email)
-        const response = await fetch(`${API_BASE_URL}/users/${user}`, {
+        console.log("email:", user)
+        const response = await fetch(`${API_BASE_URL}/calendar/${user}`, {
           method: "GET",
           headers: {
               "Content-Type": "application/json",
@@ -141,11 +139,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       const modifyCalendar = async () => {
         try {
           const dateKey = getDateKey(selectedDate)
-          const entry = await fetchCalendar(email, dateKey);
+          const entry = await fetchCalendar(user, dateKey);
           if (entry.email === "") {
-            createCalendarEntry(email, {
+            createCalendarEntry(user, {
               id: crypto.randomUUID(), // Generate a unique ID,
-              email: email,
+              email: user,
               calendar_day: dateKey,
               time_start: "",
               time_slept: "",
@@ -154,7 +152,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             });
           }
           if (routinesByDate[dateKey] != undefined) {
-            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+            editRoutine(user, dateKey, stringifyRoutine(routinesByDate[dateKey]));
           }
         } catch (error) {
           console.error('Error modifying calendar:', error);
@@ -170,11 +168,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
           console.log("repeated:", repeatDates);
           for (const date of repeatDates) {
             const dateKey = getDateKey(date)
-            const entry = await fetchCalendar(email, dateKey);
+            const entry = await fetchCalendar(user, dateKey);
             if (entry.email === "") {
-              createCalendarEntry(email, {
+              createCalendarEntry(user, {
               id: crypto.randomUUID(), // Generate a unique ID,
-              email: email,
+              email: user,
               calendar_day: dateKey,
               time_start: "",
               time_slept: "",
@@ -183,7 +181,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             });
           }
           if (routinesByDate[dateKey] != undefined) {
-            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+            editRoutine(user, dateKey, stringifyRoutine(routinesByDate[dateKey]));
           }
         }
         } catch (error) {
@@ -197,11 +195,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       const modifyCalendar = async () => {
         try {
           const dateKey = getDateKey(selectedDate)
-          const entry = await fetchCalendar(email, dateKey);
+          const entry = await fetchCalendar(user, dateKey);
           if (entry.email === "") {
-            createCalendarEntry(email, {
+            createCalendarEntry(user, {
               id: "",
-              email: email,
+              email: user,
               calendar_day: dateKey,
               time_start: "",
               time_slept: "",
@@ -210,7 +208,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
             });
           }
           if (routinesByDate[dateKey] != undefined) {
-            editRoutine(email, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+            editRoutine(user, dateKey, stringifyRoutine(routinesByDate[dateKey]));
           }
         } catch (error) {
           console.error('Error fetching calendar:', error);
@@ -227,11 +225,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   const handleSelectDate = async (date: Date): Promise<void> => {
     setSelectedDate(date);
     try {
-      const entry = await fetchCalendar(email, getDateKey(date));
+      const entry = await fetchCalendar(user, getDateKey(date));
       if (entry.email === "") {
-        createCalendarEntry(email, {
+        createCalendarEntry(user, {
           id: "",
-          email: email,
+          email: user,
           calendar_day: getDateKey(date),
           time_start: "",
           time_slept: "",

@@ -12,61 +12,61 @@ test('checks if avatars get rendered', async () => {
   const userAvatar = await waitFor(() => screen.findByRole('img',{name: 'userAvatar'}));
   fireEvent.load( userAvatar );
   expect(userAvatar.getAttribute('src')).toEqual(
-  `pokemon_starters.jpeg`
+  `NightlyProfileDefault.png`
   );
 
   const avatar1_3 = await waitFor(() => screen.findByRole('button',{name: 'avatar1_3'}));
   fireEvent.load( avatar1_3 );
   expect(avatar1_3.style.backgroundImage).toEqual(
-  `url(raichu.png)`
+  `url(NightlyProfileFHappy.png)`
   );
 
   const avatar1_2 = await waitFor(() => screen.findByRole('button',{name: 'avatar1_2'}));
   fireEvent.load( avatar1_2 );
   expect(avatar1_2.style.backgroundImage).toEqual(
-  `url(pikachu.png)`
+  `url(NightlyProfileFNeutral.png)`
   );
 
   const avatar1_1 = await waitFor(() => screen.findByRole('button',{name: 'avatar1_1'}));
   fireEvent.load( avatar1_1 );
   expect(avatar1_1.style.backgroundImage).toEqual(
-  `url(pichu.png)`
+  `url(NightlyProfileFUnhappy.png)`
   );
 
     const avatar2_3 = await waitFor(() => screen.findByRole('button',{name: 'avatar2_3'}));
   fireEvent.load( avatar1_3 );
   expect(avatar2_3.style.backgroundImage).toEqual(
-  `url(blastoise.png)`
+  `url(NightlyProfileMHappy.png)`
   );
 
   const avatar2_2 = await waitFor(() => screen.findByRole('button',{name: 'avatar2_2'}));
   fireEvent.load( avatar2_2 );
   expect(avatar2_2.style.backgroundImage).toEqual(
-  `url(wartortle.png)`
+  `url(NightlyProfileMNeutral.png)`
   );
 
   const avatar2_1 = await waitFor(() => screen.findByRole('button',{name: 'avatar2_1'}));
   fireEvent.load( avatar2_1 );
   expect(avatar2_1.style.backgroundImage).toEqual(
-  `url(squirtle.png)`
+  `url(NightlyProfileMUnhappy.png)`
   );
 
     const avatar3_3 = await waitFor(() => screen.findByRole('button',{name: 'avatar3_3'}));
   fireEvent.load( avatar3_3 );
   expect(avatar3_3.style.backgroundImage).toEqual(
-  `url(charizard.png)`
+  `url(NightlyProfileBHappy.png)`
   );
 
   const avatar3_2 = await waitFor(() => screen.findByRole('button',{name: 'avatar3_2'}));
   fireEvent.load( avatar3_2 );
   expect(avatar3_2.style.backgroundImage).toEqual(
-  `url(charmeleon.png)`
+  `url(NightlyProfileBNeutral.png)`
   );
 
   const avatar3_1 = await waitFor(() => screen.findByRole('button',{name: 'avatar3_1'}));
   fireEvent.load( avatar3_1 );
   expect(avatar3_1.style.backgroundImage).toEqual(
-  `url(charmander.png)`
+  `url(NightlyProfileBUnhappy.png)`
   );
 });
 
@@ -85,7 +85,7 @@ test('checks user avatar gets changed', async () => {
   const userAvatar = await waitFor(() => screen.findByRole('img',{name: 'userAvatar'}));
   fireEvent.load( userAvatar );
   expect(userAvatar.getAttribute('src')).toEqual(
-  `pokemon_starters.jpeg`
+  `NightlyProfileDefault.png`
   );
 
   const avatar1_3 = await waitFor(() => screen.findByRole('button',{name: 'avatar1_3'}));
@@ -94,28 +94,28 @@ test('checks user avatar gets changed', async () => {
   const lockedWarning = screen.getByText('Locked');
   expect(lockedWarning).toBeInTheDocument();
   expect(userAvatar.getAttribute('src')).toEqual(
-  `pokemon_starters.jpeg`
+  `NightlyProfileDefault.png`
   );
 
   const avatar1_1 = await waitFor(() => screen.findByRole('button',{name: 'avatar1_1'}));
   fireEvent.load( avatar1_1 );
   fireEvent.click( avatar1_1 );
   expect(userAvatar.getAttribute('src')).toEqual(
-  `pichu.png`
+  `NightlyProfileFUnhappy.png`
   );
 
   const avatar2_1 = await waitFor(() => screen.findByRole('button',{name: 'avatar2_1'}));
   fireEvent.load( avatar2_1 );
   fireEvent.click( avatar2_1 );
   expect(userAvatar.getAttribute('src')).toEqual(
-  `squirtle.png`
+  `NightlyProfileMUnhappy.png`
   );
 
   const avatar3_1 = await waitFor(() => screen.findByRole('button',{name: 'avatar3_1'}));
   fireEvent.load( avatar3_1 );
   fireEvent.click( avatar3_1 );
   expect(userAvatar.getAttribute('src')).toEqual(
-  `charmander.png`
+  `NightlyProfileBUnhappy.png`
   );
 
 });

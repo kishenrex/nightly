@@ -41,6 +41,7 @@ const initDB = async () => {
                 time_slept TEXT,
                 checklist TEXT,
                 bedtime TEXT,
+                PRIMARY KEY (email, calendar_day),
                 FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
             );
         `);
@@ -53,8 +54,8 @@ const initDB = async () => {
         await db.run(`
             INSERT OR IGNORE INTO users (email, username, password, avatar, current_streak, max_streak, theme)
             VALUES 
-                ('testuser@example.com', 'Test User', 'password123', 'pokemon_starters.jpeg', 4, 8, 'dark'),
-                ('exampleuser@example.com', 'Example User', 'password456', 'avatar2.png', 2, 5, 'light');
+                ('testuser@example.com', 'Test User', 'password123', 'NightlyProfileDefault.png', 4, 8, 'dark'),
+                ('exampleuser@example.com', 'Example User', 'password456', 'NightlyProfileMNeutral.png', 2, 5, 'light');
         `);
 
        // Insert test data into `calendar_entries` table
