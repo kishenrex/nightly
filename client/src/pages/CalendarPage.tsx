@@ -14,10 +14,11 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { UserAvatar } from '../components/UserAvatar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { ThemeContext } from '../context/ThemeContext';
-import { createCalendarEntry, editRoutine, fetchCalendar } from "../utils/routine-utils";
+import { createCalendarEntry, editRoutine, fetchCalendar, editBedtime } from "../utils/routine-utils";
 import { CalendarEntry } from "../types";
 import { parseRoutine, stringifyRoutine } from "../utils/parse";
 import { UserContext } from '../context/UserContext';
+import { TimerContext } from '../context/TimerContext';
 const API_BASE_URL = 'http://localhost:3001';
 
 // Types
@@ -27,12 +28,18 @@ export type Routine = {
   completed: boolean;
 };
 
+export type Times = {
+  bedtime: string;
+  timeStart: string;
+  timeSlept: string;
+};
+
 export type RoutinesMap = {
   [dateKey: string]: Routine[];
 };
 
 export type TimeMap = {
-  [dateKey: string]: string;
+  [dateKey: string]: Times;
 };
 
 type NightRoutineProps = {
@@ -43,7 +50,7 @@ type NightRoutineProps = {
   bedTime: string;
   timesByDate: TimeMap;
   onAddTime: (newDate: Date, bedTime: string) => void;
-  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string, completed: boolean) => void;
+  onAddRoutine: (newDate: Date, routineTitle: string, routineText: string, completed: boolean, isLoad: boolean) => void;
   onEditRoutine: (newDate: Date, routineTitle: string, routineText: string, index: number) => void;
   onToggleRoutine: (index: number) => void;
   onDeleteRoutine: (index: number) => void;
@@ -56,50 +63,56 @@ type CalendarProps = {
   timesByDate: TimeMap;
   currentMonth: number;
   setCurrentMonth: React.Dispatch<React.SetStateAction<number>>;
+  setCurrentYear: React.Dispatch<React.SetStateAction<number>>;
 };
 // Add these types at the top with other type definitions
-type Streaks = {
+export type Streaks = {
   currentStreak: number;
   maxStreak: number;
 };
 
 const ChecklistPage: React.FC = (): JSX.Element => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.UTC((new Date()).getFullYear(), (new Date()).getMonth(), (new Date()).getDate(), 23, 59, 59)));
   const [routinesByDate, setRoutinesByDate] = useState<RoutinesMap>({});
   const [timesByDate, setTimesByDate] = useState<TimeMap>({});
   const [streaks, setStreaks] = useState<Streaks>({ currentStreak: 0, maxStreak: 0 });
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+  const [month, setMonth] = useState<number>((new Date()).getMonth() + 1);
+  const [year, setYear] = useState<number>((new Date()).getFullYear());
   const [showModal, setShowModal] = useState<boolean>(false);
   const [repeatDates, setRepeatDates] = useState<Date[]>([]); 
   const port = process.env.PORT || 3001;
   const { user,setUser } = useContext(UserContext);
 
-    // Add this useEffect to fetch streaks and email when component mounts
+    // Add this useEffect to fetch streaks when component mounts
     useEffect(() => {
       const fetchStreaks = async () => {
-          try {
-              // Using the getUser endpoint instead
-              const response = await fetch(`${API_BASE_URL}/users/${user}`, {
-                  method: 'GET',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-              });
-  
-              if (!response.ok) {
-                  throw new Error('Failed to fetch streaks');
-              }
-  
-              const {data} = await response.json();
-              setStreaks({
-                  currentStreak: data.current_streak || 0,
-                  maxStreak: data.max_streak || 0
-              });
-          } catch (error) {
-              console.error('Error fetching streaks:', error);
-          }
+        try {
+            // Using the getUser endpoint instead
+            const response = await fetch(`${API_BASE_URL}/users/${user}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch streaks');
+            }
+            
+            const {data} = await response.json();
+            setStreaks({
+                currentStreak: data.current_streak || 0,
+                maxStreak: data.max_streak || 0
+            });
+        } catch (error) {
+            console.error('Error fetching streaks:', error);
+        }
       };
-  
+
+      fetchStreaks();
+    }, []);
+
+    useEffect(() => {
       const loadCalendar = async () => {
       try {
         console.log("email:", user)
@@ -117,21 +130,24 @@ const ChecklistPage: React.FC = (): JSX.Element => {
         const data = await response.json();
         let rout = null;
         data.calendar.forEach((d: CalendarEntry) => {
+          if (!(parseInt(d.calendar_day.split("-")[0]) != (new Date()).getFullYear())) {
+            
+          }
           if (parseInt(d.calendar_day.split("-")[1]) === month) {
             rout = parseRoutine(d.checklist);
             rout.forEach((r: Routine) => {
               if (!routinesByDate[d.calendar_day] && r.title != undefined) {
-                handleAddRoutine(new Date(d.calendar_day), r.title, r.text, r.completed);
+                handleAddRoutine(new Date(d.calendar_day), r.title, r.text, r.completed, true);
               }
             });
+            handleAddTimeAll(new Date(d.calendar_day), d.bedtime, d.time_start, d.time_slept);
           }
         });
-        } catch (error) {
-          console.error('Error fetching calendar:', error);
+      } catch (error) {
+        console.error('Error fetching calendar:', error);
       }
       };
-  
-      fetchStreaks();
+
       loadCalendar();
     }, [month]);
 
@@ -148,11 +164,14 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               time_start: "",
               time_slept: "",
               checklist: "",
-              bedtime: "00:00",
+              bedtime: "",
             });
           }
           if (routinesByDate[dateKey] != undefined) {
             editRoutine(user, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+          if (timesByDate[dateKey] != undefined) {
+            editBedtime(user, dateKey, timesByDate[dateKey].bedtime);
           }
         } catch (error) {
           console.error('Error modifying calendar:', error);
@@ -165,7 +184,6 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     useEffect(() => {
         const modifyCalendar = async () => {
         try {
-          console.log("repeated:", repeatDates);
           for (const date of repeatDates) {
             const dateKey = getDateKey(date)
             const entry = await fetchCalendar(user, dateKey);
@@ -177,11 +195,14 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               time_start: "",
               time_slept: "",
               checklist: "",
-              bedtime: "00:00",
+              bedtime: "",
             });
           }
           if (routinesByDate[dateKey] != undefined) {
             editRoutine(user, dateKey, stringifyRoutine(routinesByDate[dateKey]));
+          }
+          if (timesByDate[dateKey] != undefined) {
+            editBedtime(user, dateKey, timesByDate[dateKey].bedtime);
           }
         }
         } catch (error) {
@@ -193,33 +214,36 @@ const ChecklistPage: React.FC = (): JSX.Element => {
 
     useEffect(() => {
       const modifyCalendar = async () => {
-        try {
-          const dateKey = getDateKey(selectedDate)
-          const entry = await fetchCalendar(user, dateKey);
-          if (entry.email === "") {
-            createCalendarEntry(user, {
-              id: "",
-              email: user,
-              calendar_day: dateKey,
-              time_start: "",
-              time_slept: "",
-              checklist: "",
-              bedtime: "00:00",
-            });
-          }
-          if (routinesByDate[dateKey] != undefined) {
-            editRoutine(user, dateKey, stringifyRoutine(routinesByDate[dateKey]));
-          }
-        } catch (error) {
-          console.error('Error fetching calendar:', error);
+      try {
+        const dateKey = getDateKey(selectedDate)
+        const entry = await fetchCalendar(user, dateKey);
+        if (entry.email === "") {
+          createCalendarEntry(user, {
+            id: crypto.randomUUID(), // Generate a unique ID,
+            email: user,
+            calendar_day: dateKey,
+            time_start: "",
+            time_slept: "",
+            checklist: "",
+            bedtime: "",
+          });
         }
+        if (timesByDate[dateKey] != undefined) {
+          editBedtime(user, dateKey, timesByDate[dateKey].bedtime);
+        }
+      } catch (error) {
+        console.error('Error modifying bedtime:', error);
       }
-
-      modifyCalendar();
-    }, [routinesByDate]);
+    }
+    modifyCalendar();
+  }, [timesByDate]);
 
   const getDateKey = (date: Date): string => {
     return date ? date.toISOString().split('T')[0] : '';
+  };
+
+  const checkDayPast = (date: Date): boolean => {
+    return date.getTime() < Date.now() ? true : false;
   };
 
   const handleSelectDate = async (date: Date): Promise<void> => {
@@ -228,13 +252,13 @@ const ChecklistPage: React.FC = (): JSX.Element => {
       const entry = await fetchCalendar(user, getDateKey(date));
       if (entry.email === "") {
         createCalendarEntry(user, {
-          id: "",
+          id: crypto.randomUUID(),
           email: user,
           calendar_day: getDateKey(date),
           time_start: "",
           time_slept: "",
           checklist: "",
-          bedtime: "00:00",
+          bedtime: "",
         });
       }
     }
@@ -247,16 +271,33 @@ const ChecklistPage: React.FC = (): JSX.Element => {
     const dateKey = getDateKey(date);
     setTimesByDate(prev => ({
       ...prev,
-      [dateKey]: bedTime
+      [dateKey]: {bedtime: bedTime, timeStart: "", timeSlept: ""}
     }));
   };
 
-  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string, completed: boolean) => {
+  const handleAddTimeAll = (date: Date, bedTime: string, slept: string, start: string): void => {
     const dateKey = getDateKey(date);
-    setRoutinesByDate(prev => ({
+    setTimesByDate(prev => ({
       ...prev,
-      [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: false }]
+      [dateKey]: {bedtime: bedTime, timeStart: slept, timeSlept: start}
     }));
+  };
+
+  const handleAddRoutine = (date: Date, routineTitle: string, routineText: string, completed: boolean, isLoad: boolean) => {
+    const dateKey = getDateKey(date);
+    if (isLoad) {
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: completed }]
+      }));
+    }
+    else {
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: [...(prev[dateKey] || []), { title: routineTitle, text: routineText, completed: false }]
+      }));
+    }
+    
   };
 
   const handleEditRoutine = (date: Date, routineTitle: string, routineText: string, index: number) => {
@@ -271,20 +312,25 @@ const ChecklistPage: React.FC = (): JSX.Element => {
 
   const handleToggleRoutine = (index: number) => {
     const dateKey = getDateKey(selectedDate);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].map((routine, i) => 
-        i === index ? { ...routine, completed: !routine.completed } : routine
-      )
-    }));
+    if (!checkDayPast(selectedDate)) {
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: prev[dateKey].map((routine, i) => 
+          i === index ? { ...routine, completed: !routine.completed } : routine
+        )
+      }));
+    }
   };
 
   const handleDeleteRoutine = (index: number) => {
     const dateKey = getDateKey(selectedDate);
-    setRoutinesByDate(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].filter((_, i) => i !== index)
-    }));
+
+    if (!checkDayPast(selectedDate)) {
+      setRoutinesByDate(prev => ({
+        ...prev,
+        [dateKey]: prev[dateKey].filter((_, i) => i !== index)
+      }));
+    }
   };
 
   const deleteAllRoutine = (date: Date): void => {
@@ -366,6 +412,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               timesByDate={timesByDate}
               currentMonth={month}
               setCurrentMonth={setMonth}
+              setCurrentYear={setYear}
             />
           </div>
 
@@ -387,7 +434,7 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               selectedDate={selectedDate}
               routines={routinesByDate[getDateKey(selectedDate)] || []}
               routinesByDate={routinesByDate}
-              bedTime = {timesByDate[getDateKey(selectedDate)] || "00:00"}
+              bedTime = {timesByDate[getDateKey(selectedDate)] ? timesByDate[getDateKey(selectedDate)].bedtime : ""}
               timesByDate={timesByDate}
               onAddRoutine={handleAddRoutine}
               onEditRoutine={handleEditRoutine}
@@ -416,9 +463,11 @@ const ChecklistPage: React.FC = (): JSX.Element => {
                   would want to add that is optional. The night routines can be anything the user would want/need to do before they sleep.
                 </dd>
                 <dt>Bedtime: </dt>
-                <dd>The user can set an expected/desired bedtime for each day. Once the day passes, it is replaced by the actual
-                  elapsed sleep time they record each night. For example, before the current day it might be 10:00 pm for the expected 
-                  bedtime, and then after the current day, it could show 8:32:05 (8 hours, 32 minutes, and 5 seconds) for the actual elapsed sleep time. 
+                <dd>The user can set an expected bedtime for each day by clicking on the bedtime button and selecting a time, which will then be displayed on the calendar. 
+                  Once the day passes, the expected bedtime is replaced on the calendar by the actual bedtime recorded each night.
+                  The actual bedtime is based on when the sleep stopwatch is started. When the user
+                  clicks on the bedtime button after the day has passed, they will instead see their sleep metric for the day, 
+                  which is the exact time they slept based on the sleep stopwatch.
                 </dd>
                 <dt>Repeat: </dt>
                 <dd>The user can set recurrences for each night routine by choosing the days of the week to repeat, along
@@ -432,11 +481,13 @@ const ChecklistPage: React.FC = (): JSX.Element => {
                 <dt>Sleep Stopwatch: </dt>
                 <dd>The stopwatch is used to keep track of how much sleep the user gets every night. Right before the
                   user sleeps, they should start the stopwatch. When they wake up, they should immediately end the stopwatch. After ending
-                  the stopwatch, they can keep the lapsed time for the bedtime, or they can edit the time if it is inaccurate.
+                  the stopwatch, they can keep the elapsed time for the bedtime, or they can edit the time if it is inaccurate.
                 </dd>
                 <dt>Streaks: </dt>
-                <dd>The streak is used to keep the user on task with completing all of their tasks each day. Both the current 
-                  streak and the max streak is displayed for the user to keep track. </dd>
+                <dd>The streak is used to help the user achieve a better sleep schedule. The user specifies an expected bedtime that
+                  they try to go to sleep by for that day. When the sleep time for that day has been confirmed and recorded, the user's streak
+                  increases if the user has an actual bed time before or at their expected bed time and if they slept for at least 6 hours. Both the current 
+                  streak and the max streak are displayed for the user to keep track. </dd>
                 <dt>Toggle Theme: </dt>
                 <dd>The user can toggle between the day and night theme at their own convenience. </dd>
               </dl>
@@ -451,8 +502,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate, currentMonth, setCurrentMonth }): JSX.Element => {
-  const today = new Date();
+const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesByDate, currentMonth, setCurrentMonth, setCurrentYear }): JSX.Element => {
+  const today = new Date(Date.UTC((new Date()).getFullYear(), (new Date()).getMonth(), (new Date()).getDate(), 23, 59, 59));
   const [currentDate, setCurrentDate] = useState<Date>(selectedDate || today);
   const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -465,9 +516,13 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
     return date ? date.toISOString().split('T')[0] : '';
   };
 
-  const convertTime = (time: string) => {
-    if (!time) {
-      return;
+  const checkDayPast = (date: Date): boolean => {
+    return date.getTime() < Date.now() ? true : false;
+  };
+
+  const convertTime = (time: string): string => {
+    if (!time || time === "") {
+      return "";
     }
     const [hours, minutes] = time.split(':').map(Number);
     let period = 'am';
@@ -479,8 +534,20 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
     } else if (hours === 0) {
       newHours = 12;
     }
-
     return `${newHours}:${minutes.toString().padStart(2, '0')}${period}`;
+  };
+
+  const selectTime = (allTimes: Times, date: Date): string => {
+    if (!allTimes) {
+      return "";
+    }
+    if (date.getDay() === (new Date()).getDay() && allTimes.timeStart === "") {
+      return allTimes.bedtime;
+    }
+    if (checkDayPast(date)) {
+      return allTimes.timeStart;
+    }
+    return allTimes.bedtime;
   };
 
   const calendarDays = Array(35).fill(null).map((_, index) => {
@@ -502,10 +569,14 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
           {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
         </h3>
         <div>
-          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); setCurrentMonth(currentMonth - 1); } }>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); 
+            setCurrentMonth((currentMonth - 1) % 12); 
+            setCurrentYear(currentDate.getFullYear()); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-left"></i>
           </Button>
-          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)); setCurrentMonth(currentMonth + 1); } }>
+          <Button variant="outline-light" onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)); 
+            setCurrentMonth((currentMonth + 1) % 12); 
+            setCurrentYear(currentDate.getFullYear()); } }>
             <i style={{color: theme.fontColor, borderColor: theme.borderColor}} className="bi bi-chevron-right"></i>
           </Button>
         </div>
@@ -528,7 +599,7 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
                   return (
                     <td 
                       key={dayIndex} 
-                      onClick={() => dayNumber && onSelectDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber))}
+                      onClick={() => dayNumber && onSelectDate(new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), dayNumber, 23, 59, 59)))}
                       style={{ 
                         cursor: dayNumber ? 'pointer' : 'default',
                         backgroundColor: selectedDate?.getDate() === dayNumber && 
@@ -541,7 +612,8 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate, timesBy
                     >
                       <div className="d-flex align-items-center justify-content-center h-100">
                         <span style={{ fontSize: '1.1rem' }}>{dayNumber || ''} <br/> 
-                        {dayNumber && convertTime(timesByDate[getDateKey(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber || 0))])} </span>
+                        {dayNumber && convertTime(selectTime(timesByDate[getDateKey(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber || 0))], 
+                          new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber || 0)))} </span>
                       </div>
                     </td>
                   );
@@ -576,6 +648,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
   const [bedTimeText, setBedTimeText] = useState({
     text: 'Bedtime',
     icon: 'bi bi-cloud-moon'});
+  const [timeModalText, setTimeModalText] = useState("Set Bedtime");
 
   const [newTitle, setNewTitle] = useState<string>('');
   const [newRoutine, setNewRoutine] = useState<string>('');
@@ -594,8 +667,16 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
   };
   const [isActive, setIsActive] = useState<typeof isActiveKeys>(isActiveKeys);
 
+  const getDateKey = (date: Date): string => {
+    return date ? date.toISOString().split('T')[0] : '';
+  };
+
+  const checkDayPast = (date: Date): boolean => {
+    return date.getTime() < Date.now() ? true : false;
+  };
+
   const convertTime = (time: string) => {
-    if (!time) {
+    if (!time || time === "") {
       return "";
     }
     const [hours, minutes] = time.split(':').map(Number);
@@ -615,21 +696,23 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
   const openAddRoutine = (): void => {
     setNewTitle('');
     setNewRoutine('');
-    setShowModal(true);
+    if (!checkDayPast(selectedDate)) {
+      setShowModal(true);
+    }
   }
 
   const repeatAddRoutine = (date: Date) => {
-    const dateKey = selectedDate ? selectedDate.toISOString().split('T')[0] : '';
+    const dateKey = getDateKey(selectedDate);
     onDeleteAllRoutine(date);
     routinesByDate[dateKey]?.forEach(rout => {
-      onAddRoutine(date, rout.title, rout.text, rout.completed);
+      onAddRoutine(date, rout.title, rout.text, rout.completed, false);
     });
-    onAddTime(date, timesByDate[dateKey]);
+    onAddTime(date, timesByDate[dateKey].bedtime);
   }
 
   const handleSubmit = (): void => {
     if (newTitle.trim()) {
-      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim(), false);
+      onAddRoutine(selectedDate, newTitle.trim(), newRoutine.trim(), false, false);
       setShowModal(false);
     }
   };
@@ -777,10 +860,18 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
   };
 
   const handleMouseEnter = () => {
-    setBedTimeText({
-      text: convertTime(bedTime), 
-      icon: 'bi bi-cloud-moon', 
-    });
+    if (checkDayPast(selectedDate)) {
+      setBedTimeText({
+        text: convertTime(bedTime), 
+        icon: 'bi bi-cloud-moon', 
+      });
+    }
+    else {
+      setBedTimeText({
+        text: convertTime(bedTime), 
+        icon: 'bi bi-cloud-moon', 
+      });
+    }
   };
 
   // Revert content when mouse leaves
@@ -789,6 +880,27 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
       text: 'Bedtime',  
       icon: 'bi bi-cloud-moon', 
     });
+  };
+
+  const SelectAndShowTime = () => {
+    let text = "Your sleep time was not recorded on this day.";
+    if (timesByDate[getDateKey(selectedDate)]) {
+      const slept = timesByDate[getDateKey(selectedDate)].timeSlept;
+      if (slept != "") {
+        const [hours, minutes, seconds] = slept.split(':').map(Number);
+        text = "You slept " + hours + " hours, " + minutes + " minutes, and " + seconds + " seconds in total on this day."
+      }
+    }
+    return (
+      !checkDayPast(selectedDate) &&
+        (timesByDate[getDateKey(selectedDate)] ? timesByDate[getDateKey(selectedDate)].timeSlept : "") === "" ? (
+          <input style={{ color: theme.fontColor, borderColor: theme.borderColor }} value={bedTime} type="time"
+          onChange={(e) => { onAddTime(selectedDate, e.target.value); }}
+        />
+      ) : (
+        <span style={{ color: theme.fontColor }}>{text}</span>
+      )
+    );
   };
 
   const handleDayClick = (day: string) => {
@@ -875,7 +987,7 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
                 <Button 
                   size="sm"
                   onClick={(e) => {
-                    setShowModalEdit(true);
+                    if (!checkDayPast(selectedDate)) { setShowModalEdit(true) };
                     setNewTitle(routine.title);
                     setNewRoutine(routine.text);
                     setCurrIndex(index);
@@ -914,9 +1026,18 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         Routine
       </Button>
 
+        {/* Previously used to check if the day has passed or not: */}
+      {/* ( selectedDate.getFullYear() > (new Date()).getFullYear() || 
+          (selectedDate.getFullYear() <= (new Date()).getFullYear() &&
+          selectedDate.getMonth() > (new Date()).getMonth() ? true : 
+          (selectedDate.getMonth() === (new Date()).getMonth() ? selectedDate.getDay() >= (new Date()).getDay() : false) ) ) */}
+
       <Button 
         variant="outline-light" 
-        onClick={() => setShowModalTime(true)}
+        onClick={() => {setShowModalTime(true); 
+          setTimeModalText(
+            !checkDayPast(selectedDate) &&
+          (timesByDate[getDateKey(selectedDate)] ? timesByDate[getDateKey(selectedDate)].timeSlept : "") === "" ? "Set Bedtime" : "Sleep Metrics"); }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         size="lg"
@@ -1022,11 +1143,10 @@ const NightRoutine: React.FC<NightRoutineProps> = ({
         size="lg" centered>
           <div style={{backgroundColor: theme.navbar, color: theme.fontColor, borderRadius: '5px'}}>
         <Modal.Header closeButton closeVariant="white" onClick={handleSubmitRep}>
-          <Modal.Title  style= {{color: theme.fontColor, borderColor: theme.borderColor}}>Set Bedtime</Modal.Title>
+          <Modal.Title  style= {{color: theme.fontColor, borderColor: theme.borderColor}}>{timeModalText}</Modal.Title>
         </Modal.Header>
         <Modal.Body >
-          <input  style= {{color: theme.fontColor, borderColor: theme.borderColor}} value={bedTime} type="time" onChange={(e) => {onAddTime(selectedDate, e.target.value)}}> 
-          </input>
+          <SelectAndShowTime></SelectAndShowTime>
         </Modal.Body>
         <Modal.Footer>
         </Modal.Footer>

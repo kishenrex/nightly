@@ -46,9 +46,9 @@ function AvatarPage(): JSX.Element {
   const handleShow = (locked: any, avatarNum: number) => {
     if (locked) {
       if (avatarNum === 2 || avatarNum === 5 || avatarNum === 8){
-        setLockedMessage(50);
+        setLockedMessage(7);
       } else if (avatarNum === 3 || avatarNum === 6 || avatarNum === 9){
-        setLockedMessage(100);
+        setLockedMessage(14);
       }
       setShow(true);
     } else {
@@ -161,7 +161,7 @@ backgroundColor: theme.background }}>
     width:'200px', height:'500px'}} className="p-3 border">
 
       <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center',padding: '20px'}}>
-        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileBUnhappy.png`)}")`,
+        <Button style={{backgroundImage: `url("${require(`../styles/AvatarImagesFinal/NightlyProfileBHappy.png`)}")`,
         display: "flex", width: '100px', height: '100px', 
         justifyContent: 'center', alignItems: "center", opacity: '0.5'}} 
           variant="outline-dark" className="avatar3_3" aria-label= 'avatar3_3' disabled={disabled} 

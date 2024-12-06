@@ -5,7 +5,6 @@ import { Database } from "sqlite";
 export async function createCalendarEntry(req: Request, res: Response, db: Database) {
     try {
         const entry = req.body as CalendarEntry;
-        console.log("entry:", entry);
         
         if (!entry.calendar_day) {
             return res.status(400).send({ error: "Missing required fields" });
@@ -30,21 +29,6 @@ export async function updateCalendarEntry(req: Request, res: Response, db: Datab
     try {
         const { date, newList }= req.body;
 
-        const entry = await db.get('SELECT * FROM calendar_entries WHERE calendar_day = ?', [date]);
-        
-        if (!entry) {
-            return res.status(404).send({ error: "Calendar entry not found" });
-        }
-
-        // const fields = Object.keys(updates)
-        //     .filter(key => key !== 'id' && key !== 'email')
-        //     .map(key => `${key} = ?`)
-        //     .join(', ');
-
-        // const value = Object.entries(updates)
-        //     .filter(([key]) => key !== 'id' && key !== 'email')
-        //     .map(([_, value]) => value);
-
         await db.run(
             `UPDATE calendar_entries SET checklist = ? WHERE calendar_day = ?`,
             [newList, date]
@@ -56,6 +40,36 @@ export async function updateCalendarEntry(req: Request, res: Response, db: Datab
     }
 }
 
+export async function updateCalendarBed(req: Request, res: Response, db: Database) {
+    try {
+        const { date, bed }= req.body;
+
+        await db.run(
+            `UPDATE calendar_entries SET bedtime = ? WHERE calendar_day = ?`,
+            [bed, date]
+        );
+
+        return res.status(200).send({ message: "Calendar entry updated successfully" });
+    } catch (error) {
+        return res.status(400).send({ error: `Failed to update calendar entry: ${error}` });
+    }
+}
+
+export async function updateCalendarEntryTime(req: Request, res: Response, db: Database) {
+    try {
+        const { date, start , slept } = req.body;
+
+        await db.run(
+            `UPDATE calendar_entries SET time_start = ?, time_slept = ? WHERE calendar_day = ?`,
+            [start, slept, date]
+        );
+
+        return res.status(200).send({ message: "Calendar entry updated successfully" });
+    } catch (error) {
+        return res.status(400).send({ error: `Failed to update calendar entry time: ${error}` });
+    }
+}
+
 export async function getCalendarEntries(req: Request, res: Response, db: Database) {
     try {
         const email = req.params.email as string;
@@ -64,8 +78,8 @@ export async function getCalendarEntries(req: Request, res: Response, db: Databa
             [email]
         );
 
-        console.log('Fetched rows:', rows); // Log fetched rows for debugging
-        console.log('Current email:', email); // Log fetched rows for debugging
+        // console.log('Fetched rows:', rows); // Log fetched rows for debugging
+        // console.log('Current email:', email); // Log fetched rows for debugging
         res.status(200).send({ calendar: rows });
 
       } catch (err) {

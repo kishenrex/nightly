@@ -6,7 +6,7 @@ const DEFAULT_USER = {
     email: 'johnnyappleseed@nightly.com',
     username: 'JohnMachine222',
     password: 'mySecurePassword123',
-    avatar: 'pokemon_starters.jpeg',
+    avatar: 'NightlyProfileDefault.png',
     theme: 'light', // Default theme
     currentStreak: 0,
     maxStreak: 0
@@ -75,19 +75,22 @@ export async function updateUser(req: Request, res: Response, db: Database) {
     try {
         const { email } = req.params;
         const updates = req.body;
-        
-        console.log('Updating user:', email, 'with:', updates); // Debug log
 
         // Validate if email exists first
-        const existingUser = await db.get('SELECT * FROM users WHERE email = ?', [email]);
-        if (!existingUser) {
+        const user = await db.get(
+            'SELECT email, username, avatar, theme, current_streak, max_streak FROM users WHERE email = ?',
+            [email]
+        );
+
+        if (!user) {
             return res.status(404).send({ error: "User not found" });
         }
 
         // For each valid field, update it individually
         for (const [key, value] of Object.entries(updates)) {
-            if (['username', 'password', 'avatar', 'theme'].includes(key)) {
-                await db.run(
+            console.log(key, value);
+            if (['username', 'password', 'avatar', 'current_streak', 'max_streak', 'theme'].includes(key)) {
+                const line = await db.run(
                     `UPDATE users SET ${key} = ? WHERE email = ?`,
                     [value, email]
                 );
@@ -96,7 +99,7 @@ export async function updateUser(req: Request, res: Response, db: Database) {
 
         // Fetch updated user data
         const updatedUser = await db.get(
-            'SELECT email, username, avatar, theme, current_streak, max_streak FROM users WHERE email = ?', 
+            'SELECT email, username, avatar, current_streak, max_streak, theme FROM users WHERE email = ?', 
             [email]
         );
 
@@ -113,9 +116,9 @@ export async function updateUser(req: Request, res: Response, db: Database) {
 export async function updateStreak(req: Request, res: Response, db: Database) {
     try {
         const { email } = req.params;
-        const { currentStreak } = req.body;
+        const { currentStreak, maxStreak } = req.body;
 
-        const result = await db.run('UPDATE users SET streak = ? WHERE email = ?', [currentStreak, email]);
+        const result = await db.run('UPDATE users SET current_streak = ?, max_streak = ? WHERE email = ?', [currentStreak, maxStreak, email]);
         
         if (result.changes === 0) {
             return res.status(404).send({ error: "User not found" });

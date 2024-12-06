@@ -51,7 +51,33 @@ export const editRoutine = async (email: string, date: string, newList: string):
 		body: JSON.stringify({ date, newList }),
 	});
 	if (!response.ok) {
-    	throw new Error("Failed to delete sleep log");
+    	throw new Error("Failed to edit routine");
+	}	
+};
+
+export const editTimes = async (email: string, date: string, start: string, slept: string): Promise<void> => {
+	const response = await fetch(`http://localhost:${port}/calendar/${email}`, {
+    	method: "PATCH",
+		headers: {
+        	"Content-Type": "application/json",
+    	},
+		body: JSON.stringify({ date, start, slept}),
+	});
+	if (!response.ok) {
+    	throw new Error("Failed to edit sleep time");
+	}	
+};
+
+export const editBedtime = async (email: string, date: string, bed:string): Promise<void> => {
+	const response = await fetch(`http://localhost:${port}/calendar/${email}`, {
+    	method: "PATCH",
+		headers: {
+        	"Content-Type": "application/json",
+    	},
+		body: JSON.stringify({ date, bed }),
+	});
+	if (!response.ok) {
+    	throw new Error("Failed to edit bedtime");
 	}	
 };
 
