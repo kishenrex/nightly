@@ -456,15 +456,16 @@ const ChecklistPage: React.FC = (): JSX.Element => {
               <dl>
                 <dt>Calendar: </dt>
                 <dd>Click on a day to view and edit the night routine checklist for that day. Click on the arrow keys
-                  to switch months. Each cell also holds the expected bedtime/actual sleep time for the day.
+                  to switch months. Each cell also holds the expected/actual bedtime for the day.
                 </dd>
                 <dt>Night Routine: </dt>
                 <dd>Each night routine has a main description that is required and then any extra details or notes the user 
                   would want to add that is optional. The night routines can be anything the user would want/need to do before they sleep.
                 </dd>
                 <dt>Bedtime: </dt>
-                <dd>The user can set an expected bedtime for each day by clicking on the bedtime button and selecting a time, which will then be displayed on the calendar. 
-                  Once the day passes, the expected bedtime is replaced on the calendar by the actual bedtime recorded each night.
+                <dd>The user can set an expected bedtime for each day by clicking on the bedtime button and selecting a time, which will then be displayed on the calendar,
+                  as well as displayed on the bedtime button when the mouse hovers over it.  
+                  Once the day passes, the expected bedtime is replaced on only the calendar by the actual bedtime recorded each night.
                   The actual bedtime is based on when the sleep stopwatch is started. When the user
                   clicks on the bedtime button after the day has passed, they will instead see their sleep metric for the day, 
                   which is the exact time they slept based on the sleep stopwatch.
@@ -484,9 +485,8 @@ const ChecklistPage: React.FC = (): JSX.Element => {
                   the stopwatch, they can keep the elapsed time for the bedtime, or they can edit the time if it is inaccurate.
                 </dd>
                 <dt>Streaks: </dt>
-                <dd>The streak is used to help the user achieve a better sleep schedule. The user specifies an expected bedtime that
-                  they try to go to sleep by for that day. When the sleep time for that day has been confirmed and recorded, the user's streak
-                  increases if the user has an actual bed time before or at their expected bed time and if they slept for at least 6 hours. Both the current 
+                <dd>The streak is used to help the user achieve a better sleep schedule. When the sleep time for the previous
+                  night has been confirmed and recorded, the user's streak increases if the user slept for at least 6 hours. Both the current 
                   streak and the max streak are displayed for the user to keep track. </dd>
                 <dt>Toggle Theme: </dt>
                 <dd>The user can toggle between the day and night theme at their own convenience. </dd>
