@@ -2,7 +2,7 @@ import { Database } from "sqlite";
 import { createUser, getUser, updateUser, updateStreak, updateAvatar, updateTheme } from "./user-utils";
 import { Request, Response } from 'express';
 
-export function createUserEndpoints(app: any, db: Database) {
+export function createUserEndpoints(app: any, db: any) {
     app.post("/users", (req: Request, res: Response) => {
         createUser(req, res, db);
     });

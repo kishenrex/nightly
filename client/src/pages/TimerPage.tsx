@@ -10,6 +10,11 @@ import { ThemeContext } from '../context/ThemeContext';
 import { TimerContext } from '../context/TimerContext';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
+import { editTimes, fetchCalendar, createCalendarEntry } from '../utils/routine-utils';
+import { addDays } from 'date-fns';
+import { start } from 'repl';
+import { sendStreaks } from '../utils/streak-utils';
+import { Streaks } from './CalendarPage';
 
 const API_BASE_URL = 'http://localhost:3001'; // Backend base URL
 
@@ -19,6 +24,7 @@ const [edit, setEdit] = useState(false);
 const [errorMinute, setErrorMinute] = useState(false);
 const [errorSecond, setErrorSecond] = useState(false);
 const [userTime, setUserTime] = useState(0);
+const [startTime, setStartTime] = useState(new Date());
 const [hours, setHours] = useState(0);
 const [minutes, setMinutes] = useState(0);
 const [seconds, setSeconds] = useState(0);
@@ -28,6 +34,7 @@ const [calendarEntries, setCalendarEntries] = useState([]); // To store fetched 
 const [error, setError] = useState<string | null>(null);
 const [isLoading, setIsLoading] = useState(true);
 const {user, setUser } = useContext(UserContext);
+const offset = (new Date()).getTimezoneOffset() / 60;
 
 let navigate = useNavigate(); 
   const routeChange = () =>{ 
@@ -36,40 +43,72 @@ let navigate = useNavigate();
   }
 // Function to send timer data to the backend
   const sendToBackend = async () => {
-    try {
-      const calendarEntry = {
-        id: crypto.randomUUID(), // Generate a unique ID
-        email: `${user}`, // Replace with dynamic user email
-        calendar_day: new Date().toISOString().split('T')[0], // Current date
-        time_start: new Date().toISOString(), // Replace with actual start time
-        time_slept: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
-        checklist: JSON.stringify([]),
-        bedtime: '22:00:00', // Example static value
-      };
+    let day = startTime.toISOString().split('T')[0];
 
-      const response = await axios.post(`${API_BASE_URL}/calendar/${user}`, calendarEntry);
-      console.log('Timer data sent successfully:', response.data);
+    const sleepHour = parseInt(startTime.toISOString().split('T')[1].split('Z')[0].split(':')[0]);
+    // If the person goes to bed before 6 am, it counts as sleep for the previous day
+    if (startTime === new Date() && sleepHour < 6) {
+      day = addDays(startTime, -1).toISOString().split('T')[0];
+    }
+
+    const startTimeSplit = startTime.toISOString().split('T')[1].split('.')[0].split(':');
+    let startTimeHour = parseInt(startTimeSplit[0]) - offset;
+    if (startTimeHour < 0) {
+      startTimeHour = 24 + startTimeHour;
+    }
+    const start = `${startTimeHour.toString().padStart(2, '0')}:${startTimeSplit[1]}:${startTimeSplit[2]}`;
+    const slept = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    try {
+      // Using the getUser endpoint instead
+      const response = await fetch(`${API_BASE_URL}/users/${user}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to fetch streaks');
+      }
+
+      const {data} = await response.json();
+      if (hours >= 6) {
+        console.log("add 1", data.current_streak + 1);
+        const newCurrent = data.current_streak + 1 || 1;
+        const newMax = ((data.max_streak > newCurrent) ? data.max_streak : newCurrent) || 1;
+        await sendStreaks(user, newCurrent, newMax);
+      }
+      else {
+        console.log("zero", data.max_streak);
+        await sendStreaks(user, 0, data.max_streak || 0);
+      }
+
+      
     } catch (error) {
-      console.error('Error sending timer data to backend:', error);
-      setError('Failed to save timer data. Please try again.');
+        console.error('Error fetching streaks:', error);
     }
-  };
-  
-  const fetchCalendarEntries = async () => {
+
     try {
-      const response = await fetch(`${API_BASE_URL}/calendar/${user}`); // Backend endpoint
-      const { data } = await response.json();
-      console.log('Fetched calendar entries:', data);
-    } catch (err) {
-      console.error('Error fetching calendar entries:', err);
+      const entry = await fetchCalendar(user, day);
+      if (entry.email === "") {
+        createCalendarEntry(user, {
+          id: crypto.randomUUID(),
+          email: user,
+          calendar_day: day,
+          time_start: start,
+          time_slept: slept,
+          checklist: "",
+          bedtime: "",
+        });
+      }
+      else {
+        editTimes(user, day, start, slept);
+      }
+    } catch (error) {
+      console.error('Error sending time:', error);
     }
   };
-
-  // Initialize calendar data on component mount
-  useEffect(() => {
-    fetchCalendarEntries();
-  }, []);
-
 
   const handleConfirm = async () => {
     console.log('Saving timer data to backend...');
@@ -78,10 +117,12 @@ let navigate = useNavigate();
     setTime(0);
     routeChange(); // Navigate to home or calendar page
   };
+
 const handleEdit = () => {
   setEdit(true);
   setShow(false);
-}
+};
+
 const handleClose = () => {
   setUserTime(0);
   setShow(false)
@@ -126,6 +167,7 @@ const handleSeconds = (event: any) => {
       setSeconds((time/1000) % 60);
     } else {
       setRunning(true);
+      setStartTime(new Date());
     }
   };
 
@@ -166,7 +208,7 @@ const handleSeconds = (event: any) => {
         <Button style= {{
         color: theme.fontColor,
         backgroundColor: theme.foreground,
-        fontFamily: 'Montserrat',
+        fontFamily: 'Montserrat, Helvetica',
         fontSize: '35px',
         borderWidth: '2px',
         borderRadius: '10px',
@@ -191,7 +233,7 @@ const handleSeconds = (event: any) => {
           <Button aria-label="editButton"variant="primary" onClick={()=>{handleEdit();}}>
             Edit
           </Button>
-          <Button variant="success" onClick={()=>{handleConfirm(); routeChange();}}>
+          <Button variant="success" onClick={()=>{handleConfirm();}}>
             Confirm
           </Button>
         </Modal.Footer>
@@ -241,7 +283,7 @@ const handleSeconds = (event: any) => {
             </Alert>
           </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={()=>{handleConfirm(); routeChange();}}>
+          <Button variant="primary" onClick={()=>{handleConfirm();}}>
             Confirm
           </Button>
         </Modal.Footer>
